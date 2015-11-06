@@ -1,8 +1,11 @@
-from Bio import SeqIO
+#Parsing Genbank Files
+
+from Bio import SeqIO #Use SeqIO.read if there is only one genome (or sequence) in the file, and SeqIO.parse if there are multiple sequences. Since we're using genbank files, there typically (I think) only be a single giant sequence of the genome.
 genome=SeqIO.read('U00096.gbk','genbank') #you MUST tell SeqIO what format is being read
 
 print genome.features[:10] #prints a short description of the first ten features
 
+#Feature Types
 feats=set()
 for feat in genome.features:
 	feats.add(feat.type)
@@ -41,3 +44,14 @@ location=feature.location
 #could use to get upstream or downstream regions
 start=location.start.position
 end=location.end.position
+
+#Grabbing genomes from Genbank
+from Bio import Entrez
+#Replace with your real email 
+Entrez.email = 'whatev@mail.com'
+handle=Entrez.efetch(db='nucleotide',id='NC_009925',rettype='gb') # Accession id works, returns genbank format, looks in the 'nucleotide' database
+#store locally
+local_file=open('NC_009925','w')
+local_file.write(handle.read())
+handle.close()
+local_file.close()
