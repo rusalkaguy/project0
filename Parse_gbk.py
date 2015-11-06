@@ -1,8 +1,8 @@
 #Defining Accession Number and Database
 assession_number='U00096.gbk'
-db='nucleotide'
-#Parsing Genbank Files
+db='nucleotide' #To determine database from assession prefixes:http://www.ncbi.nlm.nih.gov/Sequin/acc.html
 
+#Parsing Genbank Files
 from Bio import SeqIO #Use SeqIO.read if there is only one genome (or sequence) in the file, and SeqIO.parse if there are multiple sequences. Since we're using genbank files, there typically (I think) only be a single giant sequence of the genome.
 genome=SeqIO.read(assession_number,'genbank') #you MUST tell SeqIO what format is being read
 
@@ -12,12 +12,10 @@ print genome.features[:10] #prints a short description of the first ten features
 feats=set()
 for feat in genome.features:
 	feats.add(feat.type)
-
 feats
 
 #Feature Qualifiers
 #Typical information will be 'product' (for genes), 'gene' (name) , and 'note' for misc. crap. Her's the qualifier dictionary for the first coding sequence (feature.type=='CDS'):
-
 feat=genome.features[4]
 
 feat.qualifiers
@@ -88,5 +86,53 @@ def efetch (db, **keywords): #EFetch retreives records in the requested formate 
 			# NCBI prefers an HTTP POST instead of an HTTP GET if there are >~200 IDs
 			post = True
 	return _open(cgi, variables, post) #Returns a handle to results.
-	#http://biopython.org/DIST/docs/tutorial/Tutorial.html#htoc114
-		
+#http://biopython.org/DIST/docs/tutorial/Tutorial.html#htoc114
+
+#File Format Conversion
+
+#Write Genbank File to GFF file format: http://biopython.org/wiki/GFF_Parsing
+from BCBio import GFF
+from Bio import SeqIO
+ 
+in_file = "your_file.gb"
+out_file = "your_file.gff"
+in_handle = open(in_file)
+out_handle = open(out_file, "w")
+ 
+GFF.write(SeqIO.parse(in_handle, "genbank"), out_handle)
+ 
+in_handle.close()
+out_handle.close()
+
+#Write Genbank File to BED file format: https://gist.github.com/brantfaircloth/893580
+from Bio import SeqIO
+
+import pdb
+
+def main():
+    outf = open('test/annotation/vitis_vinifera.bed', 'w')
+    header = """track name=vitVinGenes description="V. vinifera cpdna genes" itemRgb=On\n"""
+    outf.write(header)
+    for record in SeqIO.parse(open("test/annotation/vitis_vinifera.gb", "rU"), "genbank") :
+        for feature in record.features:
+            if feature.type == 'gene':
+                start = feature.location.start.position
+                stop = feature.location.end.position
+                try:
+                    name = feature.qualifiers['gene'][0]
+                except:
+                    # some features only have a locus tag
+                    name = feature.qualifiers['locus_tag'][0]
+                if feature.strand < 0:
+                    strand = "-"
+                else:
+                    strand = "+"
+                bed_line = "cpdna\t{0}\t{1}\t{2}\t1000\t{3}\t{0}\t{1}\t65,105,225\n".format(start, stop, name, strand)
+                outf.write(bed_line)
+    outf.close()
+
+
+if __name__ == '__main__':
+    main()
+	
+#Write Genbank File to BED file format:
