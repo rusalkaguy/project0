@@ -1,10 +1,11 @@
 #Defining Accession Number and Database
-assession_number='U00096.gbk'
+accession_number= 'U00096'
+file_name = accession_number + '.gbk'
 db='nucleotide' #To determine database from assession prefixes:http://www.ncbi.nlm.nih.gov/Sequin/acc.html
 
 #Parsing Genbank Files
 from Bio import SeqIO #Use SeqIO.read if there is only one genome (or sequence) in the file, and SeqIO.parse if there are multiple sequences. Since we're using genbank files, there typically (I think) only be a single giant sequence of the genome.
-genome=SeqIO.read(assession_number,'genbank') #you MUST tell SeqIO what format is being read
+genome=SeqIO.read(file_name,'genbank') #you MUST tell SeqIO what format is being read
 
 print genome.features[:10] #prints a short description of the first ten features
 
@@ -22,6 +23,8 @@ feat.qualifiers
 
 #How to use information from above in practice: 'product' and 'function' provide the current knowledge of what the gene (is thought to) make and what it (is thought to) do. 
 predicted_genes=[]
+tot_genes=0
+num_predicted= 0
 for i,feature in enumerate(genome.features):
     if feature.type=='CDS':
         if 'product' in feature.qualifiers: #verify it codes for a real protein (not pseudogene)
@@ -33,7 +36,8 @@ for i,feature in enumerate(genome.features):
             if product=='predicted protein':
                 num_predicted+=1
                 predicted_genes.append(feature)
-
+print "num_predicted =", num_predicted
+print "tot_genes =", tot_genes
 #Grabbing the coding sequence
 seq=feature.extract(genome.seq)
 protein=seq.translate() #can also use optional switches like cds=True to raise errors if not a proper coding sequence (lacks start and stop codons)
@@ -50,9 +54,9 @@ end=location.end.position
 from Bio import Entrez
 #Replace with your real email 
 Entrez.email = 'bheater@uab.edu'
-handle=Entrez.efetch(db='nucleotide',id=assession_number,rettype='gb') # Accession id works, returns genbank format, looks in the 'nucleotide' database
+handle=Entrez.efetch(db='nucleotide',id=accession_number,rettype='gb') # Accession id works, returns genbank format, looks in the 'nucleotide' database
 #store locally
-local_file=open(assession_number,'w')
+local_file=open(accession_number,'w')
 local_file.write(handle.read())
 handle.close()
 local_file.close()
