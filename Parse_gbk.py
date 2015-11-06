@@ -1,6 +1,6 @@
-#Defining Accession Number
+#Defining Accession Number and Database
 assession_number='U00096.gbk'
-
+db='nucleotide'
 #Parsing Genbank Files
 
 from Bio import SeqIO #Use SeqIO.read if there is only one genome (or sequence) in the file, and SeqIO.parse if there are multiple sequences. Since we're using genbank files, there typically (I think) only be a single giant sequence of the genome.
@@ -58,3 +58,35 @@ local_file=open(assession_number,'w')
 local_file.write(handle.read())
 handle.close()
 local_file.close()
+
+#Use NCBI Eutils to Fetch Records: http://biopython.org/DIST/docs/api/Bio.Entrez-pysrc.html
+#Fetches Entrez results, which are returned as a handle.
+def efetch (db, **keywords): #EFetch retreives records in the requested formate from a list of UIs or frmo the environment of the user.
+	"""
+	Example:
+		>>> from Bio import Entrez
+		>>>Entrez.email = "Your.Name.Here@example.org" 
+		>>>handle = Entrez.efetch(db="nucleotide", id="57240072", rettype="gb", retmode="text")
+		>>>print(handle.readline().strip())
+		LOCUS       AY851612                 892 bp    DNA     linear   PLN 10-APR-2007
+		>>> handle.close() 
+	**Warning:** NCBI changed the default retmode in Feb 2002, so databased now give XML instead of text output.
+	"""
+	cgi = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi'
+	variables = {'db': db} 
+	variables.update(keywords)
+	post = False 
+	try:
+		ids = variables["id"]
+	except KeyError:
+		pass #Raises IOError exception if a network error occurs.
+	else:
+		if isinstance(ids,list):
+			ids = ",".join(ids)
+			variables["id"] = ids
+		if ids.count(",") >=200:
+			# NCBI prefers an HTTP POST instead of an HTTP GET if there are >~200 IDs
+			post = True
+	return _open(cgi, variables, post) #Returns a handle to results.
+	#http://biopython.org/DIST/docs/tutorial/Tutorial.html#htoc114
+		
