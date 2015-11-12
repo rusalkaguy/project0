@@ -1,6 +1,6 @@
 # Defining Accession Number and Database
 accession_number= 'U00096'
-file_name = accession_number + '.download.gbk'
+file_name = accession_number + '.gbk'
 db = 'nucleotide' 
 # To determine database from assession prefixes: http://www.ncbi.nlm.nih.gov/Sequin/acc.html
 
