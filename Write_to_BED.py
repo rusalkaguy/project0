@@ -26,7 +26,7 @@ def main():
                     strand = "-"
                 else:
                     strand = "+"
-                bed_line = "cpdna\t{0}\t{1}\t{2}\t1000\t{3}\t{0}\t{1}\t65,105,225\n".format(start, stop, name, strand)
+                bed_line = accession_number + ".2" + "\t{0}\t{1}\t{2}\t1000\t{3}\t{0}\t{1}\t65,105,225\n".format(start, stop, name, strand)
                 outf.write(bed_line)
     outf.close()
 
