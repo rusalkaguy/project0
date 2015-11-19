@@ -1,6 +1,7 @@
 # Defining Accession Number, File_name, and Database
 accession_number= 'U00096'
 file_name = accession_number + '.gbk'
+db = 'nucleotide' 
 
 #Write Genbank File to BED file format: https://gist.github.com/brantfaircloth/893580
 from Bio import SeqIO
@@ -8,8 +9,8 @@ from Bio import SeqIO
 import pdb
 
 def main():
-    outf = open('test/annotation/vitis_vinifera.bed', 'w')
-    header = """track name=vitVinGenes description="V. vinifera cpdna genes" itemRgb=On\n"""
+    outf = open( accession_number +'.bed', 'w')
+    header = """track name=accession_number  description="nucleotides" itemRgb=On\n"""
     outf.write(header)
     for record in SeqIO.parse(open(file_name, "rU"), "genbank") :
         for feature in record.features:
