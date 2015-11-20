@@ -1,8 +1,4 @@
 # Defining Accession Number and Database
-accession_number= 'U00096'
-file_name = accession_number + '.gbk'
-db = 'nucleotide' 
-# To determine database from assession prefixes: http://www.ncbi.nlm.nih.gov/Sequin/acc.html
 
 # Import adds modules to your script from the python argv
 # argv = argument variable that holds the arguments you pass to your script when you run it
@@ -12,6 +8,8 @@ from sys import argv
 # "unpack" = take whater is in argv, unpack it, and assign it to all these variables on the left in order.
 # argv = accession_number 
 accession_number = argv[1]
+file_name = accession_number + '.gbk'
+db = 'nucleotide'
 
 # Grabbing genomes from Genbank
 from Bio import Entrez
