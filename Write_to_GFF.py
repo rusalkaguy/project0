@@ -1,5 +1,5 @@
 # Defining Accession Number, File_name, and Database
-accession_number= 'U00096'
+accession_number= 'NC_006273'
 file_name = accession_number + '.gbk'
 db = 'nucleotide' 
 
