@@ -18,7 +18,7 @@ import pdb
 
 def main():
     outf = open( accession_number +'.bed', 'w')
-    header = """track name=accession_number  description="nucleotides" itemRgb=On\n"""
+    header = accession_number
     outf.write(header)
     for record in SeqIO.parse(open(file_name, "rU"), "genbank") :
         for feature in record.features:
@@ -34,7 +34,7 @@ def main():
                     strand = "-"
                 else:
                     strand = "+"
-                bed_line = accession_number + ".2" + "\t{0}\t{1}\t{2}\t1000\t{3}\t{0}\t{1}\t65,105,225\n".format(start, stop, name, strand)
+                bed_line = accession_number + "\t{0}\t{1}\t{2}\t1000\t{3}\t{0}\t{1}\t65,105,225\n".format(start, stop, name, strand)
                 outf.write(bed_line)
     outf.close()
 
