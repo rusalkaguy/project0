@@ -25,4 +25,4 @@ local_file.write(handle.read()) # write takes data and writes to file
 handle.close()
 local_file.close()
 
-# run with $ python Genomes_from_Genbank.py U00096
+# run with $ python Genomes_from_Genbank.py NC_006273
