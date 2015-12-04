@@ -41,4 +41,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-	
+
+# Run with $ python Write_to_BED.py NC_006273
