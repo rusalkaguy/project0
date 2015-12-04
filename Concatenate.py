@@ -71,3 +71,11 @@ GFF.write(SeqIO.parse(in_handle, "genbank"), out_handle)
  
 in_handle.close()
 out_handle.close()
+
+# Concatenate files written in BED and GFF into one file.
+filenames = ['accession_number.bed', 'accession_number.gff', ...]
+with open('path/to/output/file', 'w') as outfile:
+    for fname in filenames:
+        with open(fname) as infile:
+            for line in infile:
+                outfile.write(line)
