@@ -18,8 +18,6 @@ import pdb
 
 def main():
     outf = open( accession_number +'.bed', 'w')
-    header = accession_number
-    outf.write(header)
     for record in SeqIO.parse(open(file_name, "rU"), "genbank") :
         for feature in record.features:
             if feature.type == 'gene':

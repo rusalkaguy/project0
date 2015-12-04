@@ -72,9 +72,12 @@ GFF.write(SeqIO.parse(in_handle, "genbank"), out_handle)
 in_handle.close()
 out_handle.close()
 
-# Concatenate files written in BED and GFF into one file.
-filenames = ['accession_number.bed', 'accession_number.gff', ...]
-with open('path/to/output/file', 'w') as outfile:
+# Create new file, within which to place all BED files 
+file = open (accession_number +'.bed', 'a+')
+
+# Concatenate files written in BED into one file: http://stackoverflow.com/questions/13613336/python-concatenate-text-files
+filenames = [accession_number + '.bed']
+with open('C:\Users\Blair Heater\Documents\GitHub\Informatics_Projects\project0'+ accession_number +'.bed', 'w') as outfile:
     for fname in filenames:
         with open(fname) as infile:
             for line in infile:
