@@ -425,3 +425,5 @@ def getgenes(args):
 
 if __name__ == '__main__':
     main()
+
+# $ python genbank_with_names.py getgenes --simple=NC006273
