@@ -179,7 +179,7 @@ class GenBank(dict):
         return gbdir
 
     @classmethod
-    def write_genes_bed(cls, gbrec, outfile):
+    def write_genes_bed(cls, gbrec, outfile, emit_cds):
         seqid = gbrec.id.split(".")[0]
         if not seqid:
             seqid = gbrec.name.split(".")[0]
@@ -194,8 +194,11 @@ class GenBank(dict):
                 try:
                     name = feature.qualifiers['gene'][0]
                 except:
-                    # some features only have a locus tag
-                    name = feature.qualifiers['locus_tag'][0]
+                    try: # some features only have a locus tag
+                       name = feature.qualifiers['locus_tag'][0]
+                    except:
+                        # who knows what it's call - use the gene count to name
+                        name = "{0}_{1}".format(seqid, genecount)
                 if feature.strand < 0:
                     strand = "-"
                 else:
@@ -205,28 +208,29 @@ class GenBank(dict):
                 # Return to original code               
                 genecount+=1
                 consecutivecds = 0
-                continue
-
+                continue # Jumps back to the for loop for next gene and skips code below
+            
             if feature.type == 'CDS':
-                if consecutivecds:
-                    genecount+=1
-                consecutivecds = 1
-                start = feature.location.start
-                stop = feature.location.end
-                if start > stop: start, stop = stop, start
-                if feature.strand < 0:
-                    strand = "-"
-                else:
-                    strand = "+"
-                # Changed from score =  "." because IGV doesn't include direction of translation without a score ("."= no score)
-                score = "1000"
-                accn = "{0}_{1}".format(seqid, genecount)
+                if emit_cds == True:
+                    if consecutivecds:
+                        genecount+=1 # Only executed if consecutivecds is not 0
+                    consecutivecds = 1
+                    start = feature.location.start
+                    stop = feature.location.end
+                    if start > stop: start, stop = stop, start
+                    if feature.strand < 0:
+                        strand = "-"
+                    else:
+                        strand = "+"
+                    # Changed from score =  "." because IGV doesn't include direction of translation without a score ("."= no score)
+                    score = "1000"
+                    accn = "{0}_{1}".format(seqid, genecount)
 
-                start = str(start).lstrip("><")
-                stop = str(stop).lstrip("><")
-                bedline = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n".\
-                    format(seqid, start, stop, accn, score, strand)
-                outfile.write(bedline)
+                    start = str(start).lstrip("><")
+                    stop = str(stop).lstrip("><")
+                    bedline = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n".\
+                        format(seqid, start, stop, accn, score, strand)
+                    outfile.write(bedline)
 
     @classmethod
     def write_genes_fasta(cls, gbrec, fwcds, fwpep):
@@ -266,12 +270,15 @@ class GenBank(dict):
                 fwcds.write(">{0}\n{1}\n".format(accn, seq))
                 fwpep.write(">{0}\n{1}\n".format(accn, seq.translate()))
 
-    def write_genes(self, output="gbout", individual=False, pep=True):
-        if not individual:
+    def write_genes(self, output="gbout", individual=False, pep=True, emit_cds=True):
+        """ If multiple accession numbers, creates and opens 3 files in 3 formats and
+        writes("w") the genomic data for each accession number in 1 file for each format.""" 
+        if not individual: 
             fwbed = must_open(output+".bed", "w")
             fwcds = must_open(output+".cds", "w")
             fwpep = must_open(output+".pep", "w")
-
+        """ For-loop that iterates the opening of a file and writing to 
+        that file for each format and every accession number."""
         for recid, rec in self.iteritems():
             if individual:
                 mkdir(output)
@@ -279,7 +286,7 @@ class GenBank(dict):
                 fwcds = must_open(op.join(output, recid+".cds"), "w")
                 fwpep = must_open(op.join(output, recid+".pep"), "w")
 
-            GenBank.write_genes_bed(rec, fwbed)
+            GenBank.write_genes_bed(rec, fwbed, emit_cds)
             GenBank.write_genes_fasta(rec, fwcds, fwpep)
 
         if not pep:
@@ -408,12 +415,14 @@ def getgenes(args):
             help="prefix of output files [default: %default]")
     p.add_option("--nopep", default=False, action="store_true",
             help="Only get cds and bed, no pep [default: %default]")
+    p.add_option("--emit_cds", default=False, action="store_true",
+            help="only get genes, no cds or pep [default: %default]")
     filenames, accessions, idfile, opts, args = preparegb(p, args)
     prefix = opts.prefix
 
     GenBank(filenames=filenames, accessions=accessions, idfile=idfile).\
         write_genes(output=prefix, individual=opts.individual, \
-        pep=(not opts.nopep))
+        pep=(not opts.nopep), emit_cds=opts.emit_cds)
 
     if opts.individual:
         logging.debug("Output written dir {0}".format(prefix))
