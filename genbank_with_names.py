@@ -147,16 +147,21 @@ class MultiGenBank (BaseFile):
             tag, = qual[gb_tag]
             g.attributes[gff_tag] = [tag]
 
-
+# Class outlines the parameters for the new object GenBank
 class GenBank(dict):
+# dict is the class from which the object BenBank inherits functions and methods
     """
     Wrapper of the GenBank record object in biopython SeqIO.
     """
+    # The constructor/initializer acts as a factory: 
+    # whenever a new object "GenBank" gets made, this code will 
+    # execute to set some default values for our variables.
     def __init__(self, filenames=None, accessions=None, idfile=None):
         self.accessions = accessions
         self.idfile = idfile
+        # 'Self' now refers to the GenBank object that is created
 
-        if filenames is not None:
+        if filenames is not None: # If filnames exist
             self.accessions = [op.basename(f).split(".")[0] for f in filenames]
             d = dict(SeqIO.to_dict(SeqIO.parse(f, "gb")).items()[0] \
                 for f in filenames)
@@ -252,6 +257,7 @@ class GenBank(dict):
                     outfile.write(bedline)
 
     @classmethod
+    # @ is a decorator that labels the class method
     def write_genes_fasta(cls, gbrec, fwcds, fwpep):
         seqid = gbrec.id.split(".")[0]
         if not seqid:
