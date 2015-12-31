@@ -26,19 +26,37 @@ MT = "mol_type"
 LT = "locus_tag"
 
 
-class MultiGenBank (BaseFile):
+class MultiGenBank (BaseFile): 
+# class = blueprint for object MultiGenBank
+# BaseFile = parentclass/superclass that passes on all functions and 
+# variables to MultiGenBank, which inhererits from ancestor
     """
     Wrapper for parsing concatenated GenBank records.
     """
+
+    # This is the constructor/initializer. Think of it as the factory: 
+    # whenever a new object "MultiGenBank" gets made, this code will 
+    # execute to set some default values for our variables.
     def __init__(self, filename, source="JCVI"):
+    # The 'self' argument is required first and
+    #  refers to this particular MultiGenBank object
         super(MultiGenBank, self).__init__(filename)
-        assert op.exists(filename)
+        # Super calls the constructor of the parent class.
+        assert op.exists(filename) 
+        # Assert ensures that the expression 'op.exists(filename)' is true.
+        # If the expression is false (filename op does not exist), 
+        # then it raises an exception error
 
         pf = filename.rsplit(".", 1)[0]
+        # filename.rsplit separates the filename by the last period(.),
+        # returns the first part of the filename before the period,
+        # and assigns it to be pf 
         fastafile, gfffile = pf + ".fasta", pf + ".gff"
+        # Multiple assignment defines the following code for each name
         fasta_fw = must_open(fastafile, "w")
         gff_fw = must_open(gfffile, "w")
 
+        # Defining attributes of self (MulitGenBank object)
         self.source = source
         self.counter = defaultdict(list)
 
@@ -66,6 +84,7 @@ class MultiGenBank (BaseFile):
                         format(nfeats, gfffile))
         gff_fw.close()
 
+    # Class method requires first argument to be "self"
     def print_gffline(self, fw, f, seqid, parent=None):
 
         score = phase = "."
