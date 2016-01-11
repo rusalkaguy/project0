@@ -232,30 +232,6 @@ class GenBank(dict):
                 # Return to original code               
                 genecount+=1
                 consecutivecds = 0
-                """ 
-                Create dictionary by gene name
-                http://learnpythonthehardway.org/book/ex39.html
-                
-                def new(num_bucket = genecount): 
-                    # Initializes a Map with the given number of genes
-                    aMap = []
-                    for i in range (0, num_bucket):
-                        aMap.append([])
-                    return aMap
-                def hash_key (aMap, key):
-                    # Given a key(gene name) this creates a number and
-                    # then converts it to an index for the genetypes' gene
-                    return hash(key) % len(aMap)
-                def get_genes (aMap, key):
-                    # Given a key, find the bucket where it would go
-                    gene_id = hash_key (aMap, key)
-                    return aMap [gene_id]
-
-                # First attempt to create dictionary using https://docs.python.org/2/library/array.html
-                dict {key:name}
-                class array.array('c'[]
-                # Array sorts items in dictionary by key in the orginal order it is read in the file
-                """
                 continue # Jumps back to the for loop for next gene and skips code below
                 
             if feature.type == 'CDS':
@@ -485,3 +461,29 @@ if __name__ == '__main__':
     main()
 
 # $ python genbank_with_names.py getgenes --simple=NC006273
+
+
+'''
+Create a dictionary of gene names as keys
+'''
+# Open the bed file previously created.
+fo = open ("gbout.bed", "r+")
+
+# Create a new dictionary 
+newdict ={}
+
+for line in fo:
+    tab = line.split() # 'tab' could be any any other variable
+    # Split at tabs is default.
+    # Insert space or comma if that denotes separation.
+    newdict[tab[3]] = '' 
+    # Brackets denote the [key] is the gene name in collumn 3
+    # The '' assigns a null value to the keys in the dictionary.
+    # newdict[tab[3]] could = line if all data is valuable.
+
+# Close opened file
+fo.close
+
+for item in newdict:
+    print item, newdict[item]
+    # prints all keys (gene names)
