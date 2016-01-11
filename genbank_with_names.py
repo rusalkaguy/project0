@@ -171,7 +171,7 @@ class GenBank(dict):
         elif idfile is not None:
             gbdir = self._get_records()
             d = dict(SeqIO.to_dict(SeqIO.parse(f, "gb")).items()[0] \
-                for f in glob(gbdir+"/*.gb"))
+                for f in glob(gbdir + "/*.gb"))
             for (k, v) in d.iteritems():
                 self[k.split(".")[0]] = v
 
@@ -232,8 +232,32 @@ class GenBank(dict):
                 # Return to original code               
                 genecount+=1
                 consecutivecds = 0
+                """ 
+                Create dictionary by gene name
+                http://learnpythonthehardway.org/book/ex39.html
+                
+                def new(num_bucket = genecount): 
+                    # Initializes a Map with the given number of genes
+                    aMap = []
+                    for i in range (0, num_bucket):
+                        aMap.append([])
+                    return aMap
+                def hash_key (aMap, key):
+                    # Given a key(gene name) this creates a number and
+                    # then converts it to an index for the genetypes' gene
+                    return hash(key) % len(aMap)
+                def get_genes (aMap, key):
+                    # Given a key, find the bucket where it would go
+                    gene_id = hash_key (aMap, key)
+                    return aMap [gene_id]
+
+                # First attempt to create dictionary using https://docs.python.org/2/library/array.html
+                dict {key:name}
+                class array.array('c'[]
+                # Array sorts items in dictionary by key in the orginal order it is read in the file
+                """
                 continue # Jumps back to the for loop for next gene and skips code below
-            
+                
             if feature.type == 'CDS':
                 if emit_cds == True:
                     if consecutivecds:
