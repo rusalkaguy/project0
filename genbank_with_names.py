@@ -461,29 +461,3 @@ if __name__ == '__main__':
     main()
 
 # $ python genbank_with_names.py getgenes --simple=NC006273
-
-
-'''
-Create a dictionary of gene names as keys
-'''
-# Open the bed file previously created.
-fo = open ("gbout.bed", "r+")
-
-# Create a new dictionary 
-newdict ={}
-
-for line in fo:
-    tab = line.split() # 'tab' could be any any other variable
-    # Split at tabs is default.
-    # Insert space or comma if that denotes separation.
-    newdict[tab[3]] = '' 
-    # Brackets denote the [key] is the gene name in collumn 3
-    # The '' assigns a null value to the keys in the dictionary.
-    # newdict[tab[3]] could = line if all data is valuable.
-
-# Close opened file
-fo.close
-
-for item in newdict:
-    print item, newdict[item]
-    # prints all keys (gene names)
