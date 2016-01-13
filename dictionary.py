@@ -18,7 +18,7 @@ for line in fr:
     key_name = tab[key_name_col]
     if key_name in new_dict:
         
-    elif new_dict[key_name] = tab [pos_col]
+    else new_dict[key_name] = tab [pos_col]
     # Brackets denote the [key] is the key_name
     # new_dict[key_name] = tab [pos_col] sets the key name to be the position
     # Tab is more helpful becuase tab is already parsed.
@@ -44,6 +44,4 @@ for item in new_dict:
 
         print y
         # Prints all keys in random order from new_dict
-
-
 
