@@ -1,28 +1,49 @@
 '''
 Create a dictionary of gene names as keys
 '''
-bed_gene_name_col = 3
-# Open (fo = "file open") the bed file previously created.
-fo = open ("gbout.bed", "r+")
+pos_col = 0
+key_name_col = 1
+pos_name_col = 2
 
-# Create a new dictionary og gene names
-gene_dict ={} # Key is the gene name 
+# Open (fo = "file open") the file previously created with array.
+fo = open ("example_for_dictionary.py", "r+")
+fr = fo.readlines()
+# Create a new dictionary
+new_dict = {} # Key is the letter in the first collumn. 
 
-for line in fo:
+for line in fr:
     tab = line.split() # 'tab' could be any any other variable
     # Split at tabs is default: i.e. empty brackets.
     # Insert space or comma in parenthesis () if that denotes separation.
-    gene_name = tab[bed_gene_name_col]
-    gene_dict[gene_name] = tab
-    # Brackets denote the [key] is the gene name in collumn 3
-    # The '' assigns a null value to the keys in the dictionary.
-    # newdict[tab[3]] could =  tab or line if all data is valuable.
+    key_name = tab[key_name_col]
+    if key_name in new_dict:
+        
+    elif new_dict[key_name] = tab [pos_col]
+    # Brackets denote the [key] is the key_name
+    # new_dict[key_name] = tab [pos_col] sets the key name to be the position
     # Tab is more helpful becuase tab is already parsed.
+
+    # Create a nested dictionary
+    newer_dict = {}
+
+    for line in fr:
+        tab = line.split()
+        pos_name = tab[pos_col]
+        newer_dict[pos_name] = tab[pos_name_col]
 
 # Close opened file
 fo.close
 
-for item in gene_dict:
-    # Gene_dict as a dictionary has random order
-    print item, gene_dict[item]
-    # Prints all keys (gene names) in random order from gene_dict
+for item in new_dict:
+    # new_dict as a dictionary has random order
+    x = str(item +"    "+ new_dict[item])
+
+
+    for item in newer_dict:
+        y = str(x +":" + newer_dict [item])
+
+        print y
+        # Prints all keys in random order from new_dict
+
+
+
