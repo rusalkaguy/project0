@@ -15,8 +15,8 @@ file_read = file_open.readlines()
 
 gene_dict = {} # Creates a new dictionary
 for line in file_read:
-    if '#' in line:
-        continue
+    if '#' in line:     # Change to if '#' exists in line, 
+        continue        # only consider code before '#' 
     tab = line.split() # 'tab' could be any any other variable
     # Split at tabs is default: i.e. empty brackets.
     # Insert space or comma in parenthesis () if that denotes separation.
@@ -29,13 +29,13 @@ for line in file_read:
     exon_dict["stop"] = tab[exon_stop_col]
     
     # look up gene to see if it exists
-    exon_list = gene_dict[gene_name]
-    if exon_list:
+    exon_list = gene_dict[gene_name] # Sets an empty dictionary
+    if gene_name not in exon_list: # KeyError: 'A'
         # gene exists, just append new exon
         exon_list.append(exon_dict) 
     else:
         # new gene - create an array with one exon it it
-        gene_dict[gene_name] = [exon_dict]
+        gene_dict[gene_name] = exon_dict
     
 # Shift print formatting from prior file
 
@@ -58,7 +58,7 @@ for key in gene_dict:
         #    continue
     #print ex_output_array
     print key+'\t'+','.join(ex_output_array)
-        
+
 # Print the results
 for key, value in gene_dict.iteritems():
     print(key, value) 
