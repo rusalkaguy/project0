@@ -22,9 +22,6 @@ for line in file_read:
     if '#' in line:
         continue
     # Split the line in the file by tab
-    tab = line.split() # 'tab' could be any any other variable
-    # Split at tabs is default: i.e. empty brackets.
-    # Insert space or comma in parenthesis () if that denotes separation.
 
     # Create an array of items within each line
     row = line.split()
@@ -33,44 +30,56 @@ for line in file_read:
     # gene_exon_array = [['1','A','qwe','22','3'], ['2','B','wse','1','4'],...]
 
 # Create the array for gene names
-gene_name = []
+gene_name_array = []
 
 for line in gene_exon_array:
-    if line [1] not in gene_name:
-        gene_name.append(line[1])
-        # gene_name = ['A','B','C','D','Z']
+    if line [1] not in gene_name_array:
+        gene_name_array.append(line[1])
+        # gene_name_array = ['A','B','C','D','Z']
 
 # Create the dictionary for exons
 exon_dict = {}
 # Create the dictionary for gene names
 gene_dict = {}
 
-for gene in gene_name:
+for gene in gene_name_array:
     exon = []
     for line in gene_exon_array:
         if line [1] == gene:
             exon.append(line[0:1]+line[2:6])
     # Set dictionary key to be gene correlated to exon information
     gene_dict[gene]=exon
-    
-    print exon
+
 
     for item in exon:
         if item[0] not in exon_dict:
             exon_dict[item[0]]=item[1]
-        print exon_dict
 
 
-
-
-'''
-for key in exon_dict:
-    print key, exon_dict
-print ' '
-'''
+print "#--------- gene_dict ------------"
 for key in gene_dict:
-    print key, gene_dict
+    # create string for exon list
+    gene_ex_list = gene_dict[key]
+    ex_output_array = []
+    for ex in gene_ex_list:
+        # format exon (ex) and add to output array
+        formatted_exon_string = ex[1] + ":" + ex[2] + "-" + ex[3]
+        ex_output_array.append(formatted_exon_string)
+        #print "%", key, ":" , formatted_exon_string
+        #if ex not in ex_output_array:
+        #    ex_output_array.append(ex[1])
+        #    ex_output_array.append(ex[2:4])
+        #    continue
+        #if ex in ex_output_array:
+        #    ex_output_array.append(ex[2:4])
+        #    continue
+    #print ex_output_array
+    print key+'\t'+','.join(ex_output_array)
 
+
+
+# Close opened file
+file_open.close
 
 '''
 exon_list = [] # Initializes an empty array (not a list)
@@ -112,6 +121,6 @@ for key, value in gene_dict.iteritems():
 for i in gene_dict:
     print i 
     raw_input()
-    '''
-# Close opened file
-file_open.close
+
+'''
+
