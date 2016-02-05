@@ -51,5 +51,5 @@ for line in file_open:
     # Tab is more helpful becuase tab is already parsed.
 
 # Close opened file
-fo.close
+file_open.close
 
