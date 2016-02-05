@@ -7,6 +7,9 @@ exon_name_col = 2
 exon_start_col = 3
 exon_stop_col = 4
 
+# for debugging output
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 # Open the file previously created with array.
 file_open = open ("example_for_dictionary.txt", "r+")
@@ -29,42 +32,39 @@ for line in file_read:
     exon_dict["stop"] = tab[exon_stop_col]
     
     # look up gene to see if it exists
-    exon_list = gene_dict[gene_name] # Sets an empty dictionary
-    if gene_name not in exon_list: # KeyError: 'A'
+    try: 
+        exon_list = gene_dict[gene_name] # get defition for this gene
         # gene exists, just append new exon
         exon_list.append(exon_dict) 
-    else:
+    except KeyError:
         # new gene - create an array with one exon it it
-        gene_dict[gene_name] = exon_dict
+        exon_list = [ exon_dict]
+        gene_dict[gene_name] = exon_list
     
 # Shift print formatting from prior file
-
 print "#--------- gene_dict ------------"
+pp.pprint(gene_dict)
+print "#--------- formatted gene_dict ------------"
 for key in gene_dict:
     # create string for exon list
     gene_ex_list = gene_dict[key]
     ex_output_array = []
-    for ex in gene_ex_list:
-        # format exon (ex) and add to output array
-        formatted_exon_string = ex[1] + ":" + ex[2] + "-" + ex[3]
+    for exon_dict in gene_ex_list:
+        # format exon (exon_dict) and add to output array
+        formatted_exon_string = exon_dict['name'] + ":" + exon_dict['start'] + "-" + exon_dict['stop']
         ex_output_array.append(formatted_exon_string)
         #print "%", key, ":" , formatted_exon_string
-        #if ex not in ex_output_array:
-        #    ex_output_array.append(ex[1])
-        #    ex_output_array.append(ex[2:4])
+        #if exon_dict not in ex_output_array:
+        #    ex_output_array.append(exon_dict[1])
+        #    ex_output_array.append(exon_dict[2:4])
         #    continue
-        #if ex in ex_output_array:
-        #    ex_output_array.append(ex[2:4])
+        #if exon_dict in ex_output_array:
+        #    ex_output_array.append(exon_dict[2:4])
         #    continue
     #print ex_output_array
     print key+'\t'+','.join(ex_output_array)
 
-# Print the results
-for key, value in gene_dict.iteritems():
-    print(key, value) 
 
-print gene_dict
-# Understand flow and formatting: draw a picture.
 
 # Close opened file
 file_open.close
