@@ -18,8 +18,9 @@ file_read = file_open.readlines()
 
 gene_dict = {} # Creates a new dictionary
 
-line = file_read.splitlines()
+line=file_read
 gene_map = map(lambda line: line.split()[exon_name_col], line)
+print gene_map
 '''
 for line in file_read:
     if '#' in line:     # Change to if '#' exists in line, 
