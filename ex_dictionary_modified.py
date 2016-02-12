@@ -26,7 +26,9 @@ for line in file_read:
     index = tab[index_col]
     gene_name = tab[gene_name_col]
 
+    # Create exon dictionary
     exon_dict = {}
+    # Set key-value pairs in exon dictionary
     exon_dict["name"] = tab[exon_name_col]
     exon_dict["start"] = tab[exon_start_col]
     exon_dict["stop"] = tab[exon_stop_col]
@@ -34,11 +36,11 @@ for line in file_read:
     # look up gene to see if it exists
     try: 
         exon_list = gene_dict[gene_name] # get defition for this gene
-        # gene exists, just append new exon
+        # If gene exists in dictionary, append new exon
         exon_list.append(exon_dict) 
     except KeyError:
-        # new gene - create an array with one exon it it
-        exon_list = [ exon_dict]
+        # If new gene, create an array with one exon in it
+        exon_list = [exon_dict]
         gene_dict[gene_name] = exon_list
     
 # Shift print formatting from prior file
@@ -64,7 +66,32 @@ for key in gene_dict:
     #print ex_output_array
     print key+'\t'+','.join(ex_output_array)
 
+# Replace inner for loop above and ex_ouput_array through line 55 with map and function 
+print "#--------- formatted gene_dict with map and function ------------"
+def format_exon(x): # x is input argument
+    return x["name"]+':'+str(x["start"])+'-'+str(x["stop"])
+for key in gene_dict:
+    exon_list = gene_dict[key]
+    print key+'\t'+",".join(map(format_exon,exon_list))
+    #for exon in exon_list:
+    #    print key+'\t'+ format_exon(exon)
 
+'''
+for key in gene_dict:
+    # create string for exon list
+    gene_ex_list = gene_dict[key]
+    def format_exon(exon_list):
+        return exon_list["name"]+':'+str(exon_list["start"])+'-'+str(exon_list["stop"])
+    # print gene_dict
+    print format_exon(gene_ex_list)
 
+# "name:start-stop"
+print format_exon(gene_ex_list) 
+
+# print exons lists
+for xl in [gene_ex_list]:
+    print xl
+    print ",".join(map(format_exon,xl))
+'''
 # Close opened file
 file_open.close
