@@ -23,7 +23,6 @@ for line in file_read:
     tab = line.split() # 'tab' could be any any other variable
     # Split at tabs is default: i.e. empty brackets.
     # Insert space or comma in parenthesis () if that denotes separation.
-    index = tab[index_col]
     gene_name = tab[gene_name_col]
 
     # Create exon dictionary
