@@ -21,59 +21,33 @@ gene_name_col = 1
 location_col = 2
 
 
-# Open the file of interester
+# Open the file of interest
 file_open = open ("example_genbank_redux.txt", "r+")
 file_read = file_open.readlines()
 
 gene_dict = {} # Creates a new dictionary
 for line in file_read:
-    if '#' in line:     # Change to if '#' exists in line, 
-        continue        # only consider code before '#' 
-    tab = line.split() # 'tab' could be any any other variable
+    line = line.split('#')[0]
+    tab = line.split()  # 'tab' could be any any other variable
     # Split at tabs is default: i.e. empty brackets.
     # Insert space or comma in parenthesis () if that denotes separation.
+    if len(tab) == 0:
+        continue
+    print tab
     gene_name = tab[gene_name_col]
-	feature_type = tab[feature_col]
-	location = tab[location_col]
-	# Look up gene to see if it exists in gene_dict
-	if gene_name not in gene_dict:
-		gene_dict[gene_name]= feature_type
-	else:
-		if feature_type in gene_dict:
-			
-
-
-	# Create feature dictionary
-    feature_dict = {}
-    # Set key-value pairs in exon dictionary
-    feature_dict["strand"] = tab[exon_name_col]
-    feature_dict["name"] = tab[exon_name_col]
-    feature_dict["start"] = tab[exon_start_col]
-    feature_dict["stop"] = tab[exon_stop_col]
-
+    feature_type = tab[feature_type_col]
+    location = tab[location_col]
+    if gene_name in gene_dict
+'''
     # look up gene to see if it exists
-	try:
+    try:
 		feature_list = gene_dict[gene_name] # get defition for this gene
         # If gene exists in dictionary, append new feature
-        exon_list.append(feature_dict) 
+        feature_list.append(feature_dict)
     except KeyError:
         # If new gene, create an array with one exon in it
         feature_list = [feature_dict]
         gene_dict[gene_name] = feature_list
 '''
-	 # Create exon dictionary
-    exon_dict = {}
-    # Set key-value pairs in exon dictionary
-    exon_dict["name"] = tab[exon_name_col]
-    exon_dict["start"] = tab[exon_start_col]
-    exon_dict["stop"] = tab[exon_stop_col]
-    
-    # look up gene to see if it exists
-    try: 
-        exon_list = gene_dict[gene_name] # get defition for this gene
-        # If gene exists in dictionary, append new exon
-        exon_list.append(exon_dict) 
-    except KeyError:
-        # If new gene, create an array with one exon in it
-        exon_list = [exon_dict]
-        gene_dict[gene_name] = exon_list
+for key in gene_dict:
+    print gene_dict[key]
