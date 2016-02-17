@@ -7,6 +7,9 @@ exon_name_col = 2
 exon_start_col = 3
 exon_stop_col = 4
 
+# for debugging output
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 # Open the file previously created with array.
 file_open = open ("example_for_dictionary.txt", "r+")
@@ -76,7 +79,8 @@ for key in gene_dict:
     #print ex_output_array
     print key+'\t'+','.join(ex_output_array)
 
-
+print "#--------- gene_dict ------------"
+pp.pprint(gene_dict)
 
 # Close opened file
 file_open.close
