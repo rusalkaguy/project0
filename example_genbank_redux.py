@@ -37,17 +37,25 @@ for line in file_read:
     gene_name = tab[gene_name_col]
     feature_type = tab[feature_type_col]
     location = tab[location_col]
-    if gene_name in gene_dict
+    for location:
+        location.split()
+    gene_dict[gene_name] = feature_type
+
+        # look up gene to see if it exists
+        try:
+    		feature_list = gene_dict[gene_name] # get defition for this gene
+            # If gene exists in dictionary, append new feature
+            feature_list.append(feature_dict)
+        except KeyError:
+            # If new gene, create an array with one exon in it
+            feature_list = [feature_dict]
+            gene_dict[gene_name] = feature_list
 '''
-    # look up gene to see if it exists
-    try:
-		feature_list = gene_dict[gene_name] # get defition for this gene
-        # If gene exists in dictionary, append new feature
-        feature_list.append(feature_dict)
-    except KeyError:
-        # If new gene, create an array with one exon in it
-        feature_list = [feature_dict]
-        gene_dict[gene_name] = feature_list
-'''
+def format_exon(x): # x is input argument
+    return x["name"]+':'+str(x["start"])+'-'+str(x["stop"])
 for key in gene_dict:
-    print gene_dict[key]
+    exon_list = gene_dict[key]
+    print key+'\t'+",".join(map(format_exon,exon_list))
+    #for exon in exon_list:
+    #    print key+'\t'+ format_exon(exon)
+'''
