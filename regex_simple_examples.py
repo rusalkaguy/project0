@@ -11,24 +11,24 @@ pat='complement\((.*)\)'
 print "target=", target
 p = re.compile(pat)
 #------------------------------------------
-m = p.match( target )
+m = p.match( target ) # only finds 1st match at begining of string
 print "pat=",pat, " match=", m
 if m:
     print 'Match found. Span=', m.span(), ' Group(0)=', m.group(), 'Group(1)=', m.group(1)
 else:
     print 'No match'
 #------------------------------------------
-s = p.search( target )
+s = p.search( target ) # finds 1st pattern anywhere in string
 print "pat=",pat, " search=", s
 if s:
     print 'search found. Span=', s.span(), ' Group=', s.group()
 else:
     print 'No search hit'
 #------------------------------------------
-fa = p.findall( target )
+fa = p.findall( target ) # finds all matches anywhere in string
 print "pat=",pat, " findall=", fa
 #------------------------------------------
-hits = p.finditer(target)
+hits = p.finditer(target) # returns objects for matches
 for match in hits:
     print 'finditer found. Span=', match.span(), ' Group=', match.group()
 #    print 'No search hit'
