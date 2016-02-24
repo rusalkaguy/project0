@@ -93,4 +93,19 @@ for line in file_read:
     # Add key-value pair {feature_type:loc_array} to gene_def dictionary
     gene_def[feature_type]=loc_array
 
+print "#--------- gene_dict ------------"
 pp.pprint(gene_dict)
+
+# Variable for bed format
+chrom = 'NC_006273'
+score = 0
+
+
+print "#--------- formatted gene_dict with map and function ------------"
+def format_exon(x): # x is input argument
+    return str(chrom),'\t',str(x['start']),'-',str(x['stop']),str(gene_dict[key]),str(score)
+for key in gene_dict:
+    gene_list = gene_dict[key]
+    print key+'\t'+",".join(map(format_exon,gene_list))
+    # error--> sol'n: http://stackoverflow.com/questions/18931315/typeerror-string-indices-must-be-integers-not-str-working-with-dict
+
