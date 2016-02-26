@@ -96,16 +96,34 @@ for line in file_read:
 print "#--------- gene_dict ------------"
 pp.pprint(gene_dict)
 
+''' 
+Variables writing in bed format
+chrom = NC_006273 # The name of the chromosome
+chromStart =  # The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0.
+chomEnd =  # The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. 
+# For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, and span the bases numbered 0-99.
+name = # Defines the name of the BED line. 
+score = # A score between 0 and 1000.
+strand = # Defines the strand - either '+' or '-'complement.
+thickStart = # The starting position at which the feature is drawn thickly (for example, the start codon in gene displays). 
+# When there is no thick part, thickStart and thickEnd are usually set to the chromStart position.
+thickEnd = # The ending position at which the feature is drawn thickly (for example, the stop codon in gene displays).
+itemRgb = # An RGB value of the form R,G,B (e.g. 255,0,0). If the track line itemRgb attribute is set to "On", this RBG value will determine the display color of the data contained in this BED line. 
+blockCount = # The number of blocks (exons) in the BED line.
+blockSizes = # A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.
+blockStart = # A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.
+'''
+
 # Variable for bed format
 chrom = 'NC_006273'
 score = 0
 
 
 print "#--------- formatted gene_dict with map and function ------------"
-def format_exon(x): # x is input argument
+def format_bed(x): # x is input argument
     return str(chrom),'\t',str(x['start']),'-',str(x['stop']),str(gene_dict[key]),str(score)
 for key in gene_dict:
     gene_list = gene_dict[key]
-    print key+'\t'+",".join(map(format_exon,gene_list))
+    print key+'\t'+",".join(map(format_bed,gene_list))
     # error--> sol'n: http://stackoverflow.com/questions/18931315/typeerror-string-indices-must-be-integers-not-str-working-with-dict
-
+    # as you go through each dictionary, add another nest
