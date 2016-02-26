@@ -141,13 +141,12 @@ def format_bed6_line(gene_def_dict):
         return '\t'+ gene_def_dict['start']+'\t'+gene_def_dict['stop']
     '''
 
-'''
 # create the block-specific columns  9-12 (harder, requires IF statements inside)
 def format_bed12_blocks(gene_def_dict) :
     #perhaps the latter calls the former
     for gene_def_dict in gene_dict:
         print format_bed12_blocks(gene_def_dict)
-'''
+
 def format_bed12_blocks(gene_def_dict):
     bed6_str = format_bed6_line(gene_def_dict)
     # then add extra columns
