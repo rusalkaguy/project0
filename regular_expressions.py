@@ -130,38 +130,55 @@ def format_bed6_line(gene_def_dict):
     # first 6 columns: 
     # how do i fix 'chrom','name', and 'score' without using variables in the function?
     # either make def more specific or call info outside of def and for loop, to later incoorporate
+    
     return 'chrom'+'\t'+ gene_def_dict['gene'][0]['start']+'\t'+\
         gene_def_dict['gene'][0]['stop']+'\t'+'name'+'\t'+'score'+'\t'+\
-        gene_def_dict['gene'][0]['strand'] # lines 1-6 working
+        gene_def_dict['gene'][0]['strand']
     # how do i differentiate between CDS and genes or mRNA without a for loop or if statement?
     # nested calls to get values of dictionaries by dict[key]
     # str.join() is a similar function to split that will separate items by tab if i indicate column and delimeter
 
-    # columns 7-8?? unessesary?
-    
-    if 'CDS' in gene_def_dict:
-        return '\t'+ gene_def_dict['start']+'\t'+gene_def_dict['stop']
-    else:
-        return '\t'+ gene_def_dict['start']+'\t'+gene_def_dict['stop']
     
 '''
 # create the block-specific columns  9-12 (harder, requires IF statements inside)
+# add Rbg, blockCount, blockSizes, blockStarts
 def format_bed12_blocks(gene_def_dict) :
     #perhaps the latter calls the former
     for gene_def_dict in gene_dict:
         print format_bed12_blocks(gene_def_dict)
-
-def format_bed12_blocks(gene_def_dict):
-    bed6_str = format_bed6_line(gene_def_dict)
-    # then add extra columns
-    block_cols = [10,11,12]
-    return join('\t', bed6_str, join('\t',block_cols))
 '''
+def format_bed12_line(gene_def_dict):
+    bed6_str = format_bed6_line(gene_def_dict)
+    print 'bed6_str = ', bed6_str
+    
+    # columns 7-8 thickStart and thickStop
+    cds_count= len(gene_def_dict['CDS'])
+    print 'CDS_count = '+str(cds_count)
+    if cds_count>0 :
+        thick_start = gene_def_dict['CDS'][0]['start']
+        thick_stop = gene_def_dict['CDS'][cds_count-1]['stop'] 
+    
+        # compute blockCount    blockSizes  blockStarts
+        block_count = cds_count
+        #block_sizes=[] # initialize array of integer sizes
+        block_starts=[] # initialize array of integer starts
+        for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
+            print 'exon_dict= ',exon_dict
+            # create block size and block start lists 
+            block_size=int(thick_stop)-int(thick_start)
+            #block_sizes.append(block_size)
+            block_start= int()
+        return '\t'.join([bed6_str, thick_start, thick_stop, str(block_size)]) # format thickStart and thickEnd columns 7 and 8 and blocks
+    
+    # then add extra columns
+    #block_cols = [10,11,12]
+    #return join('\t', bed6_str, join('\t',block_cols))
+
 # that way you can first test with 
 for key in gene_dict:
     print '-----------key of gene_dict-------------'
     print key
-    print format_bed6_line(gene_dict[key])
+    print format_bed12_line(gene_dict[key])
 
 #and once that is working, change to full bed12. 
 
