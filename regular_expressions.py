@@ -129,18 +129,22 @@ for key in gene_dict:
 def format_bed6_line(gene_def_dict): 
     # first 6 columns: 
     # how do i fix 'chrom','name', and 'score' without using variables in the function?
-    return 'chrom'+'\t'+ gene_def_dict['start']+'\t'+gene_def_dict['stop']+'\t'+'name'+'\t'+'score'+'\t'+gene_def_dict['strand']+'\t'+ gene_def_dict['start']+'\t'+gene_def_dict['stop']
+    # either make def more specific or call info outside of def and for loop, to later incoorporate
+    return 'chrom'+'\t'+ gene_def_dict['gene'][0]['start']+'\t'+\
+        gene_def_dict['gene'][0]['stop']+'\t'+'name'+'\t'+'score'+'\t'+\
+        gene_def_dict['gene'][0]['strand'] # lines 1-6 working
     # how do i differentiate between CDS and genes or mRNA without a for loop or if statement?
+    # nested calls to get values of dictionaries by dict[key]
     # str.join() is a similar function to split that will separate items by tab if i indicate column and delimeter
 
-    # columns 7-8?? unnessicary?
-    '''
+    # columns 7-8?? unessesary?
+    
     if 'CDS' in gene_def_dict:
         return '\t'+ gene_def_dict['start']+'\t'+gene_def_dict['stop']
     else:
         return '\t'+ gene_def_dict['start']+'\t'+gene_def_dict['stop']
-    '''
-
+    
+'''
 # create the block-specific columns  9-12 (harder, requires IF statements inside)
 def format_bed12_blocks(gene_def_dict) :
     #perhaps the latter calls the former
@@ -152,10 +156,12 @@ def format_bed12_blocks(gene_def_dict):
     # then add extra columns
     block_cols = [10,11,12]
     return join('\t', bed6_str, join('\t',block_cols))
-
+'''
 # that way you can first test with 
-for gene_def_dict in gene_dict:
-    print format_bed6_line(gene_def_dict)
+for key in gene_dict:
+    print '-----------key of gene_dict-------------'
+    print key
+    print format_bed6_line(gene_dict[key])
 
 #and once that is working, change to full bed12. 
 
