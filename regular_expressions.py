@@ -153,6 +153,7 @@ def format_bed12_line(gene_def_dict):
     
     # columns 7-8 thickStart and thickStop
     cds_count= len(gene_def_dict['CDS'])
+    #mRNA_count=len(gene_def_dict['mRNA'])
     print 'CDS_count = '+str(cds_count)
     if cds_count>0 :
         thick_start = gene_def_dict['CDS'][0]['start']
@@ -165,12 +166,21 @@ def format_bed12_line(gene_def_dict):
         for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
             print 'exon_dict= ',exon_dict
             # create block size and block start lists 
+
         for n in range(0,block_count):
-            block_size=int(gene_def_dict['CDS'][n]['stop'])-int(gene_def_dict['CDS'][n]['start'])
+            block_size=str(int(gene_def_dict['CDS'][n]['stop'])-int(gene_def_dict['CDS'][n]['start']))
             block_sizes.append(block_size)
-            block_start= int(gene_def_dict['CDS'][n]['start'])-int(gene_def_dict['gene'][0]['start'])
+            block_start= str(int(gene_def_dict['CDS'][n]['start'])-int(gene_def_dict['gene'][0]['start']))
             block_starts.append(block_start)
-        return '\t'.join([bed6_str, thick_start, thick_stop, str(block_sizes), str(block_starts)]) # format thickStart and thickEnd columns 7 and 8 and blocks
+        # Replace str(block_sizes) with code to make a comma-separated list of integers i.e.map(str, [blockstarts])
+        
+        # only apply the CDS to the mRNA's that completely contain it. 
+        #if mRNA_count>0:
+        # If there are 2 mRNAs, we need to output 2 lines in the bed file - not trivial, but great, if you can. Not first priority. 
+
+        block_sizes_str=','.join(block_sizes)
+        block_starts_str=','.join(block_starts)
+        return '\t'.join([bed6_str, thick_start, thick_stop, block_sizes_str, block_starts_str]) # format thickStart and thickEnd columns 7 and 8 and blocks
     
     # then add extra columns
     #block_cols = [10,11,12]
