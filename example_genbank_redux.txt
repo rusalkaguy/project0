@@ -7,13 +7,42 @@
 gene	UL30A	complement(37605..38174)
 mRNA	UL30A	complement(37605..38174)
 CDS	UL30A	complement(37894..38133)
+
 gene	UL33	43415..44773
 CDS	UL33	join(43415..43441,43562..44773)
+
 gene	UL36	complement(48595..50128)
 CDS	UL36	complement(join(48595..49823,49927..50128))
+
 gene	UL38	complement(51482..52477)
 CDS	UL38	complement(51482..52477)
+
 gene	UL41A	complement(53498..54838)
 mRNA	UL41A	complement(53498..54838)
 CDS	UL41A	complement(54401..54637)
 
+# 3 exons
+gene	UL36	complement(50262..53060)
+CDS	UL36	complement(join(50262..51197,51302..51344,52573..53060))
+
+# 2 mRNAs with different names (added new column for name, used NCBI /product value - see if code dies or happily ignores it)
+# CDS actually applies to both mRNAs, only it's truncated in the short form!
+gene	UL40	complement(53498..54344)
+mRNA	UL40	complement(53498..54314)	/product="membrane glycoprotein UL40"
+mRNA	UL40	complement(53498..54206)	/product="membrane glycoprotein UL40 short form"
+CDS	UL40	complement(53574..54239)	/product="membrane glycoprotein UL40"
+
+# 2 mRNAs with intron
+gene	UL73	106937..109088
+mRNA	UL73	join(106972..107496,108854..109088)	/product="envelope glycoprotein N"
+mRNA	UL73	join(106995..107496,108854..109088)	/product="envelope glycoprotein N"
+CDS	UL73	107051..107458				/product="envelope glycoprotein N"
+
+# 2 mRNA with intron, 1 CDS
+# leave in regulatory region to see if that breaks the code, or if it happily skips over it. 
+gene	UL74A	107708..109088
+regulatory	UL74A	107708..107713	/regulatory_class="TATA_box"
+mRNA	UL74A	join(107740..108155,108854..109088)	/product="envelope glycoprotein 24"
+regulatory	UL74A	107828..107833	/regulatory_class="TATA_box"
+mRNA	UL74A	join(107860..108155,108854..109088)	/product="envelope glycoprotein 24"
+CDS	UL74A	join(108142..108155,108854..109052)	/product="envelope glycoprotein 24"	/codon_start=1
