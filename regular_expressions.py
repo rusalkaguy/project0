@@ -160,15 +160,17 @@ def format_bed12_line(gene_def_dict):
     
         # compute blockCount    blockSizes  blockStarts
         block_count = cds_count
-        #block_sizes=[] # initialize array of integer sizes
+        block_sizes=[] # initialize array of integer sizes
         block_starts=[] # initialize array of integer starts
         for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
             print 'exon_dict= ',exon_dict
             # create block size and block start lists 
-            block_size=int(thick_stop)-int(thick_start)
-            #block_sizes.append(block_size)
-            block_start= int()
-        return '\t'.join([bed6_str, thick_start, thick_stop, str(block_size)]) # format thickStart and thickEnd columns 7 and 8 and blocks
+        for n in range(0,block_count):
+            block_size=int(gene_def_dict['CDS'][n]['stop'])-int(gene_def_dict['CDS'][n]['start'])
+            block_sizes.append(block_size)
+            block_start= int(gene_def_dict['CDS'][n]['start'])-int(gene_def_dict['gene'][0]['start'])
+            block_starts.append(block_start)
+        return '\t'.join([bed6_str, thick_start, thick_stop, str(block_sizes), str(block_starts)]) # format thickStart and thickEnd columns 7 and 8 and blocks
     
     # then add extra columns
     #block_cols = [10,11,12]
