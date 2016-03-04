@@ -1,0 +1,19 @@
+# getting one's head around different types of genes
+# gene = CDS
+# gene = mRNA > CDS
+# and positive vs negative(complement) strand gene orientation
+
+#feature_type	gene_name	location
+gene	UL30A	complement(37605..38174)
+mRNA	UL30A	complement(37605..38174)
+CDS	UL30A	complement(37894..38133)
+gene	UL33	43415..44773
+CDS	UL33	join(43415..43441,43562..44773)
+gene	UL36	complement(48595..50128)
+CDS	UL36	complement(join(48595..49823,49927..50128))
+gene	UL38	complement(51482..52477)
+CDS	UL38	complement(51482..52477)
+gene	UL41A	complement(53498..54838)
+mRNA	UL41A	complement(53498..54838)
+CDS	UL41A	complement(54401..54637)
+
