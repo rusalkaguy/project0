@@ -45,4 +45,8 @@ regulatory	UL74A	107708..107713	/regulatory_class="TATA_box"
 mRNA	UL74A	join(107740..108155,108854..109088)	/product="envelope glycoprotein 24"
 regulatory	UL74A	107828..107833	/regulatory_class="TATA_box"
 mRNA	UL74A	join(107860..108155,108854..109088)	/product="envelope glycoprotein 24"
+<<<<<<< HEAD
 CDS	UL74A	join(108142..108155,108854..109052)	/product="envelope glycoprotein 24"	/codon_start=1
+=======
+CDS	UL74A	join(108142..108155,108854..109052)	/product="envelope glycoprotein 24"	/codon_start=1
+>>>>>>> fdda417c5a6a1ca1b6f18d29b852f9f7ea9bd115
