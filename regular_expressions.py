@@ -1,4 +1,6 @@
+# Regular expressions find and parse particular pieces of information for bed formatting
 
+# Variables for column location
 feature_type_col = 0
 gene_name_col = 1
 location_col = 2
@@ -97,27 +99,6 @@ for line in file_read:
 print "#--------- gene_dict { gene_def_dict { exon_dict } } ------------"
 pp.pprint(gene_dict)
 
-''' 
-Variables writing in bed format
-1. chrom = NC_006273 # The name of the chromosome
-2. chromStart =  # The starting position of the feature in the chromosome or scaffold. The first base in a chromosome is numbered 0.
-3. chomEnd =  # The ending position of the feature in the chromosome or scaffold. The chromEnd base is not included in the display of the feature. 
-# For example, the first 100 bases of a chromosome are defined as chromStart=0, chromEnd=100, and span the bases numbered 0-99.
-4. name = # Defines the name of the BED line. 
-5. score = # A score between 0 and 1000.
-6. strand = # Defines the strand - either '+' or '-'complement.
-7. thickStart = # The starting position at which the feature is drawn thickly (for example, the start codon in gene displays). 
-# When there is no thick part, thickStart and thickEnd are usually set to the chromStart position.
-8. thickEnd = # The ending position at which the feature is drawn thickly (for example, the stop codon in gene displays).
-9. itemRgb = # An RGB value of the form R,G,B (e.g. 255,0,0). If the track line itemRgb attribute is set to "On", this RBG value will determine the display color of the data contained in this BED line. 
-10. blockCount = # The number of blocks (exons) in the BED line.
-11. blockSizes = # A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.
-12. blockStart = # A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.
-'''
-
-# Variable for bed format
-chrom = 'NC_006273'
-score = 0
 '''
 print "#--------- formatted gene_dict with map and function ------------"
 def format_bed(x): # x is input argument
@@ -139,15 +120,7 @@ def format_bed6_line(gene_def_dict):
     # nested calls to get values of dictionaries by dict[key]
     # str.join() is a similar function to split that will separate items by tab if i indicate column and delimeter
 
-    
-'''
-# create the block-specific columns  9-12 (harder, requires IF statements inside)
-# add Rbg, blockCount, blockSizes, blockStarts
-def format_bed12_blocks(gene_def_dict) :
-    #perhaps the latter calls the former
-    for gene_def_dict in gene_dict:
-        print format_bed12_blocks(gene_def_dict)
-'''
+
 def format_bed12_line(gene_def_dict):
     bed6_str = format_bed6_line(gene_def_dict)
     #print 'bed6_str = ', bed6_str
@@ -167,7 +140,6 @@ def format_bed12_line(gene_def_dict):
         #for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
             #print 'exon_dict= ',exon_dict # for reference
         # create block size and block start lists 
-    
         # only apply the CDS to the mRNA's that completely contain it. 
         if mrna_count>0: 
             # If there are 2 mRNAs, we need to output 2 lines in the bed file - not trivial, but great, if you can. Not first priority. 
