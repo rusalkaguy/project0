@@ -187,21 +187,22 @@ def format_bed12_line(gene_def_dict):
 
         block_sizes_str=','.join(block_sizes)
         block_starts_str=','.join(block_starts)
-        return '\t'.join([bed6_str, thick_start, thick_stop, block_sizes_str, block_starts_str]) # format thickStart and thickEnd columns 7 and 8 and blocks
+        return '\t'.join([bed6_str, thick_start, thick_stop, block_sizes_str, block_starts_str])+'\n' # format thickStart and thickEnd columns 7 and 8 and blocks
     
-    # then add extra columns
-    #block_cols = [10,11,12]
-    #return join('\t', bed6_str, join('\t',block_cols))
 
-# that way you can first test with 
+# Write the formatted information to a new bed file.
+bed_file= open('bed_file.bed','w') 
+# 'a' creates new file if it does not exist and does not truncate the file if it does exist
+# 'w' creates the file if the file does not exist, but it will truncate the existing file
+
+
 for key in gene_dict:
     print '-----------key of gene_dict-------------'
     print key
     print format_bed12_line(gene_dict[key])
- 
+    bed_file.write(format_bed12_line(gene_dict[key]))
 
-# Write the formatted information to a new bed file.
-#bed_file= open()
-
-# Close opened file
-file_open.close
+# Close the original opened text file
+file_open.close;
+# Close the newly written bed file
+bed_file.close
