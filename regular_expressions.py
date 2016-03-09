@@ -64,7 +64,6 @@ for line in file_read:
     else:   
         spans = location
     #print "spans="+ spans
-
     '''
     # if comma--> join use findall
         # Identify the join pattern for exons
@@ -83,7 +82,6 @@ for line in file_read:
     for match in hits:
         #print 'finditer found. Span=', ' Group=', match.group()
         loc_dict={  'strand':strand, 'start':match.group(1), 'stop':match.group(2)}
-        #loc_dict={}
         #loc_dict['start'] = match.group(1)
         #stop = match.group(2)
         #print loc_dict
@@ -92,8 +90,11 @@ for line in file_read:
 
     # Add key-value pair {feature_type:loc_array} to gene_def dictionary
     gene_def_dict[feature_type]=loc_array
+    # Add key-value pair {'mRNA':[]} to gene_def_dict to make format conistent and aid formatting later.
+    if 'mRNA' not in gene_def_dict:
+        gene_def_dict['mRNA']=[]
 
-print "#--------- gene_dict ------------"
+print "#--------- gene_dict { gene_def_dict { exon_dict } } ------------"
 pp.pprint(gene_dict)
 
 ''' 
@@ -149,12 +150,12 @@ def format_bed12_blocks(gene_def_dict) :
 '''
 def format_bed12_line(gene_def_dict):
     bed6_str = format_bed6_line(gene_def_dict)
-    print 'bed6_str = ', bed6_str
+    #print 'bed6_str = ', bed6_str
     
     # columns 7-8 thickStart and thickStop
     cds_count= len(gene_def_dict['CDS'])
-    #mRNA_count=len(gene_def_dict['mRNA'])
-    print 'CDS_count = '+str(cds_count)
+    mrna_count=len(gene_def_dict['mRNA'])
+    #print 'CDS_count = '+str(cds_count)
     if cds_count>0 :
         thick_start = gene_def_dict['CDS'][0]['start']
         thick_stop = gene_def_dict['CDS'][cds_count-1]['stop'] 
@@ -164,19 +165,25 @@ def format_bed12_line(gene_def_dict):
         block_sizes=[] # initialize array of integer sizes
         block_starts=[] # initialize array of integer starts
         for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
-            print 'exon_dict= ',exon_dict
-            # create block size and block start lists 
-
-        for n in range(0,block_count):
-            block_size=str(int(gene_def_dict['CDS'][n]['stop'])-int(gene_def_dict['CDS'][n]['start']))
-            block_sizes.append(block_size)
-            block_start= str(int(gene_def_dict['CDS'][n]['start'])-int(gene_def_dict['gene'][0]['start']))
-            block_starts.append(block_start)
-        # Replace str(block_sizes) with code to make a comma-separated list of integers i.e.map(str, [blockstarts])
-        
+            print 'exon_dict= ',exon_dict # for reference
+        # create block size and block start lists 
+    
         # only apply the CDS to the mRNA's that completely contain it. 
-        #if mRNA_count>0:
-        # If there are 2 mRNAs, we need to output 2 lines in the bed file - not trivial, but great, if you can. Not first priority. 
+        if mrna_count>0: 
+            # If there are 2 mRNAs, we need to output 2 lines in the bed file - not trivial, but great, if you can. Not first priority. 
+            # for m in range(0,mrna_count):
+            for n in range(0,block_count):
+                block_size=str(int(gene_def_dict['mRNA'][n]['stop'])-int(gene_def_dict['mRNA'][n]['start']))
+                block_sizes.append(block_size)
+                block_start= str(int(gene_def_dict['mRNA'][n]['start'])-int(gene_def_dict['mRNA'][0]['start']))
+                block_starts.append(block_start)
+        # when no mRNA is present (mrna_count=0), cds defines block size and start    
+        else: 
+            for n in range(0,block_count):
+                block_size=str(int(gene_def_dict['CDS'][n]['stop'])-int(gene_def_dict['CDS'][n]['start']))
+                block_sizes.append(block_size)
+                block_start= str(int(gene_def_dict['CDS'][n]['start'])-int(gene_def_dict['gene'][0]['start']))
+                block_starts.append(block_start)
 
         block_sizes_str=','.join(block_sizes)
         block_starts_str=','.join(block_starts)
@@ -191,8 +198,10 @@ for key in gene_dict:
     print '-----------key of gene_dict-------------'
     print key
     print format_bed12_line(gene_dict[key])
+ 
 
-#and once that is working, change to full bed12. 
+# Write the formatted information to a new bed file.
+#bed_file= open()
 
 # Close opened file
 file_open.close
