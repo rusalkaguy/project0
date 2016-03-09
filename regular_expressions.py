@@ -48,8 +48,8 @@ for line in file_read:
 
     # Check to see if gene exits
     if gene_name not in gene_dict: # if gene not in dict,
-        gene_dict[gene_name]={}    # create empty dict
-
+        gene_dict[gene_name]={'gene_name': gene_name} # set dictionary and store gene_name to process later
+        #gene_dict[gene_name]['gene_name']=gene_name
     # Set gene_dict to key-value pair {gene_name:gene_def_dict} 
     gene_def_dict = gene_dict[gene_name]
 
@@ -133,7 +133,7 @@ def format_bed6_line(gene_def_dict):
     # either make def more specific or call info outside of def and for loop, to later incoorporate
     
     return 'chrom'+'\t'+ gene_def_dict['gene'][0]['start']+'\t'+\
-        gene_def_dict['gene'][0]['stop']+'\t'+'name'+'\t'+'score'+'\t'+\
+        gene_def_dict['gene'][0]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+'score'+'\t'+\
         gene_def_dict['gene'][0]['strand']
     # how do i differentiate between CDS and genes or mRNA without a for loop or if statement?
     # nested calls to get values of dictionaries by dict[key]
@@ -164,8 +164,8 @@ def format_bed12_line(gene_def_dict):
         block_count = cds_count
         block_sizes=[] # initialize array of integer sizes
         block_starts=[] # initialize array of integer starts
-        for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
-            print 'exon_dict= ',exon_dict # for reference
+        #for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
+            #print 'exon_dict= ',exon_dict # for reference
         # create block size and block start lists 
     
         # only apply the CDS to the mRNA's that completely contain it. 
@@ -197,8 +197,8 @@ bed_file= open('bed_file.bed','w')
 
 
 for key in gene_dict:
-    print '-----------key of gene_dict-------------'
-    print key
+    #print '-----------key of gene_dict-------------'
+    #print key
     print format_bed12_line(gene_dict[key])
     bed_file.write(format_bed12_line(gene_dict[key]))
 
