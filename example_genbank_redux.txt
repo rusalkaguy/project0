@@ -46,9 +46,7 @@ mRNA	UL74A	join(107740..108155,108854..109088)	/product="envelope glycoprotein 2
 regulatory	UL74A	107828..107833	/regulatory_class="TATA_box"
 mRNA	UL74A	join(107860..108155,108854..109088)	/product="envelope glycoprotein 24"
 CDS	UL74A	join(108142..108155,108854..109052)	/product="envelope glycoprotein 24"	/codon_start=1
-<<<<<<< HEAD
 
-=======
 #
 # UL124: (gene, 1 mRNA (2 exons), 1 CDS) 
 # in this case (and in others that have mRNA), we should use the mRNA location, rather than the gene location 
@@ -61,4 +59,4 @@ gene	UL124	171704..174649
 regulatory	UL124	171704..171709	/regulatory_class="TATA_box"
 mRNA	UL124	join(171737..171874,174081..174649)	/product="membrane protein UL124"
 CDS	UL124	174123..174575	/product="membrane protein UL124"	/codon_start=1
->>>>>>> 465211441926fab5f6091d1f23df5c54843608e8
+
