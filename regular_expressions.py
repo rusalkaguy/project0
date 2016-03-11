@@ -83,7 +83,7 @@ for line in file_read:
     hits = q2.finditer(spans) # returns objects for matches per group
     for match in hits:
         #print 'finditer found. Span=', ' Group=', match.group()
-        loc_dict={  'strand':strand, 'start':match.group(1), 'stop':match.group(2)}
+        loc_dict={ 'strand':strand, 'start':match.group(1), 'stop':match.group(2)}
         #loc_dict['start'] = match.group(1)
         #stop = match.group(2)
         #print loc_dict
@@ -140,22 +140,21 @@ def format_bed12_line(gene_def_dict):
         #for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
             #print 'exon_dict= ',exon_dict # for reference
         # create block size and block start lists 
-        # only apply the CDS to the mRNA's that completely contain it. 
+        # only apply the CDS to the mRNA's that completely contain it.
+        virtual_mrna_list = [gene_def_dict['CDS'][0]]
         if mrna_count>0: 
+            virtual_mrna_list = gene_def_dict['mRNA'] 
+
+        for mrna_def in virtual_mrna_list: 
             # If there are 2 mRNAs, we need to output 2 lines in the bed file - not trivial, but great, if you can. Not first priority. 
             # for m in range(0,mrna_count):
             for n in range(0,block_count):
-                block_size=str(int(gene_def_dict['mRNA'][n]['stop'])-int(gene_def_dict['mRNA'][n]['start']))
+                # can replace with for exon_def in mrna_def[exons] and gets rid of n subscripts
+                block_size=str(int(mrna_def[n]['stop'])-int(mrna_def[n]['start']))
                 block_sizes.append(block_size)
-                block_start= str(int(gene_def_dict['mRNA'][n]['start'])-int(gene_def_dict['mRNA'][0]['start']))
+                block_start= str(int(mrna_def[n]['start'])-int(mrna_def[0]['start']))
                 block_starts.append(block_start)
         # when no mRNA is present (mrna_count=0), cds defines block size and start    
-        else: 
-            for n in range(0,block_count):
-                block_size=str(int(gene_def_dict['CDS'][n]['stop'])-int(gene_def_dict['CDS'][n]['start']))
-                block_sizes.append(block_size)
-                block_start= str(int(gene_def_dict['CDS'][n]['start'])-int(gene_def_dict['gene'][0]['start']))
-                block_starts.append(block_start)
 
         block_sizes_str=','.join(block_sizes)
         block_starts_str=','.join(block_starts)
