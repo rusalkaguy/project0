@@ -79,19 +79,30 @@ for line in file_read:
             print start_stop
     '''
     # use group function --> more efficient because only parse loop once
-    loc_array = [] # make empty array
+    loc_array = [] # make empty array to store strand, start, and stop info
+    # neccessary when more than one exon or CDS region exists for a gene
+    mrna_array=[] # create empty array to store mrna associated with each exon
+    # necessary when more than one mrna for each exon exists for a gene
     hits = q2.finditer(spans) # returns objects for matches per group
     for match in hits:
         #print 'finditer found. Span=', ' Group=', match.group()
         loc_dict={ 'strand':strand, 'start':match.group(1), 'stop':match.group(2)}
-        #loc_dict['start'] = match.group(1)
-        #stop = match.group(2)
-        #print loc_dict
         loc_array.append(loc_dict)
-    #print loc_array
 
     # Add key-value pair {feature_type:loc_array} to gene_def dictionary
-    gene_def_dict[feature_type]=loc_array
+    # Check to see if 'mRNA' is already a key in the dictionary
+    if feature_type == 'mRNA' and 'mRNA' in gene_def_dict:
+        # If value associated with'mRNA' is already in dict and the value is a dictionary
+        if len(gene_def_dict['mRNA']) > 0 and type(gene_def_dict['mRNA'][0]) is dict:
+            # Add loc_array as the second element to the array containing the value for dict 
+            gene_def_dict['mRNA'] = [gene_def_dict['mRNA'], loc_array]
+        # If len(gene_def_dict['mRNA']) is an empty array
+        else: 
+            gene_def_dict['mRNA'].append(loc_array)
+    # If value associated with'mRNA' is not already in dict and the value is a dictionary
+    else:
+        # Append loc_array to empty loc_array
+        gene_def_dict[feature_type]=loc_array
     # Add key-value pair {'mRNA':[]} to gene_def_dict to make format conistent and aid formatting later.
     if 'mRNA' not in gene_def_dict:
         gene_def_dict['mRNA']=[]
