@@ -81,8 +81,6 @@ for line in file_read:
     # use group function --> more efficient because only parse loop once
     loc_array = [] # make empty array to store strand, start, and stop info
     # neccessary when more than one exon or CDS region exists for a gene
-    mrna_array=[] # create empty array to store mrna associated with each exon
-    # necessary when more than one mrna for each exon exists for a gene
     hits = q2.finditer(spans) # returns objects for matches per group
     for match in hits:
         #print 'finditer found. Span=', ' Group=', match.group()
@@ -157,8 +155,11 @@ def format_bed12_line(gene_def_dict):
         virtual_mrna_list = [gene_def_dict['CDS'][0]]
         if mrna_count>0: 
             virtual_mrna_list = gene_def_dict['mRNA'] 
-        
-        for mrna_def in virtual_mrna_list:   
+        print(virtual_mrna_list)
+        for mrna_def in virtual_mrna_list:
+            # HACK fix
+            #if type(mrna_def) is list:
+            #    mrna_def = mrna_def[0]   
             block_size=str(int(mrna_def['stop'])-int(mrna_def['start']))
             block_sizes.append(block_size)
             block_start= str(int(mrna_def['start'])-int(mrna_def['start']))
