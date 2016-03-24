@@ -134,16 +134,17 @@ def format_bed6_line(gene_def_dict):
 
 def format_bed12_line(gene_def_dict):
     bed6_str = format_bed6_line(gene_def_dict)
-    #print 'bed6_str = ', bed6_str
-    
+    # column 9:itemRgb
+    item_rgb='0,0,0'
     # columns 7-8 thickStart and thickStop
     cds_count= len(gene_def_dict['CDS'])
     mrna_count=len(gene_def_dict['mRNA'])
     #print 'CDS_count = '+str(cds_count)
     if cds_count>0 :
+        # columns 7-8 thickStart and thickStop
         thick_start = gene_def_dict['CDS'][0]['start']
         thick_stop = gene_def_dict['CDS'][cds_count-1]['stop'] 
-    
+        # Columns 10-12
         # compute blockCount    blockSizes  blockStarts
         block_count = cds_count
         block_sizes=[] # initialize array of integer sizes
@@ -163,11 +164,18 @@ def format_bed12_line(gene_def_dict):
             block_start= str(int(mrna_def['start'])-int(mrna_def['start']))
             block_starts.append(block_start)
 
+            block_sizes_str=','.join(block_sizes)
+            block_starts_str=','.join(block_starts)
+
             # If there are 2 mRNAs, we need to output 2 lines in the bed file
-            # for m in range(0,mrna_count):
-        block_sizes_str=','.join(block_sizes)
-        block_starts_str=','.join(block_starts)
-        return '\t'.join([bed6_str, thick_start, thick_stop, block_sizes_str, block_starts_str])+'\n' # format thickStart and thickEnd columns 7 and 8 and blocks
+            return '\t'.join([bed6_str, thick_start, thick_stop, item_rgb, block_sizes_str, block_starts_str])+'\n' # format thickStart and thickEnd columns 7 and 8 and blocks
+
+
+        #block_sizes_str=','.join(block_sizes)
+        #block_starts_str=','.join(block_starts)
+
+
+        #return '\t'.join([bed6_str, thick_start, thick_stop, block_sizes_str, block_starts_str])+'\n' # format thickStart and thickEnd columns 7 and 8 and blocks
     
 
 # Write the formatted information to a new bed file.
