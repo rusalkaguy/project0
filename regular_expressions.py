@@ -105,8 +105,8 @@ for line in file_read:
     if 'mRNA' not in gene_def_dict:
         gene_def_dict['mRNA']=[]
 
-print "#--------- gene_dict { gene_def_dict { exon_dict } } ------------"
-pp.pprint(gene_dict)
+#print "#--------- gene_dict { gene_def_dict { exon_dict } } ------------"
+#pp.pprint(gene_dict)
 
 '''
 print "#--------- formatted gene_dict with map and function ------------"
@@ -128,10 +128,11 @@ def format_bed6_line(gene_def_dict):
     # how do i differentiate between CDS and genes or mRNA without a for loop or if statement?
     # nested calls to get values of dictionaries by dict[key]
     # str.join() is a similar function to split that will separate items by tab if i indicate column and delimeter
-
-
+chrom='HCMV'
+rgb='0,0,0'
 def format_bed12_line(gene_def_dict):
-    bed6_str = format_bed6_line(gene_def_dict)
+
+    #pp.pprint(gene_def_dict)
     # column 9:itemRgb
     item_rgb='0,0,0'
     # columns 7-8 thickStart and thickStop
@@ -143,38 +144,42 @@ def format_bed12_line(gene_def_dict):
         thick_stop = gene_def_dict['CDS'][cds_count-1]['stop']
 
         # compute blockCount    blockSizes  blockStarts
-        block_count = cds_count
-        block_sizes=[] # initialize array of integer sizes
-        block_starts=[] # initialize array of integer starts
-        #for exon_dict in gene_def_dict['CDS']: # make variable for gene_def_dict['CDS']
-            #print 'exon_dict= ',exon_dict # for reference
+
+        mrna_ouput=[]
+        mrna_ouputs=[]
         # create block size and block start lists
         # only apply the CDS to the mRNA's that completely contain it.
         virtual_mrna_list = [gene_def_dict['CDS']] # list of CDS, where CDS is a list of exon_def's
+        # when no mRNA is present (mrna_count=0), cds defines block size and start
         if mrna_count>0:
             virtual_mrna_list = gene_def_dict['mRNA']
-
         for mrna_def in virtual_mrna_list:
+            block_count = len(mrna_def) # number of blocks for each mRNA
+            bed6_str = chrom+'\t'+ mrna_def[0]['start']+'\t'+\
+                mrna_def[block_count-1]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+'score'+'\t'+\
+                mrna_def[0]['strand']
+
             # If there are 2 mRNAs, we need to output 2 lines in the bed file
             # for m in range(0,mrna_count):
             #print "mrna_def"
             #pp.pprint(mrna_def)
+            block_sizes=[] # initialize array of integer sizes
+            block_starts=[] # initialize array of integer starts
             for exon_def in mrna_def:
                 #print "exon_def"
                 #pp.pprint(exon_def)
                 #print mrna_def[0]['start']
-                # can replace with for exon_def in mrna_def[exons] and gets rid of Need for n subscripts
                 block_size= str(int(exon_def['stop'])-int(exon_def['start']))
                 block_sizes.append(block_size)
                 block_start= str(int(exon_def['start'])-int(mrna_def[0]['start']))                
                 block_starts.append(block_start)
-            # when no mRNA is present (mrna_count=0), cds defines block size and start
 
-
-        block_sizes_str=','.join(block_sizes)
-        block_starts_str=','.join(block_starts)
-        # format thickStart and thickEnd columns 7 and 8 and blocks
-        return '\t'.join([bed6_str, thick_start, thick_stop, block_sizes_str, block_starts_str])+'\n' 
+            block_sizes_str=','.join(block_sizes)
+            block_starts_str=','.join(block_starts)
+            # format thickStart and thickEnd columns 7 and 8 and blocks
+            mrna_ouput='\t'.join([bed6_str, thick_start, thick_stop, rgb, str(block_count), block_sizes_str, block_starts_str])
+            mrna_ouputs.append(mrna_ouput)
+        return '\n'.join(mrna_ouputs) 
 
 
 # Write the formatted information to a new bed file.
@@ -187,7 +192,7 @@ for key in gene_dict:
     #print '-----------key of gene_dict-------------'
     #print key
     print format_bed12_line(gene_dict[key])
-    bed_file.write(format_bed12_line(gene_dict[key]))
+    bed_file.write(format_bed12_line(gene_dict[key])+'\n')
 
 # Close the original opened text file
 file_open.close;
