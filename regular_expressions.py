@@ -134,6 +134,7 @@ def format_bed12_line(gene_def_dict):
 
     #pp.pprint(gene_def_dict)
     # column 9:itemRgb
+    score=1000
     item_rgb='0,0,0'
     # columns 7-8 thickStart and thickStop
     cds_count= len(gene_def_dict['CDS'])
@@ -156,7 +157,7 @@ def format_bed12_line(gene_def_dict):
         for mrna_def in virtual_mrna_list:
             block_count = len(mrna_def) # number of blocks for each mRNA
             bed6_str = chrom+'\t'+ mrna_def[0]['start']+'\t'+\
-                mrna_def[block_count-1]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+'score'+'\t'+\
+                mrna_def[block_count-1]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+str(score)+'\t'+\
                 mrna_def[0]['strand']
 
             # If there are 2 mRNAs, we need to output 2 lines in the bed file
