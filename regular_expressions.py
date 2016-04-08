@@ -128,7 +128,7 @@ def format_bed6_line(gene_def_dict):
     # how do i differentiate between CDS and genes or mRNA without a for loop or if statement?
     # nested calls to get values of dictionaries by dict[key]
     # str.join() is a similar function to split that will separate items by tab if i indicate column and delimeter
-chrom='gi|155573622|ref|NC_006273.2|'
+chrom='NC_006273.2'
 rgb='0,0,0'
 def format_bed12_line(gene_def_dict):
 
