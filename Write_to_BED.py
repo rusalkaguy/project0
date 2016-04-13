@@ -17,27 +17,30 @@ from Bio import SeqIO
 import pdb
 
 def main():
-    outf = open( accession_number +'.bed', 'w')
-    for record in SeqIO.parse(open(file_name, "rU"), "genbank") :
-        for feature in record.features:
-            if feature.type == 'gene':
-                start = feature.location.start.position
-                stop = feature.location.end.position
-                try:
-                    name = feature.qualifiers['gene'][0]
-                except:
-                    # some features only have a locus tag
-                    name = feature.qualifiers['locus_tag'][0]
-                if feature.strand < 0:
-                    strand = "-"
-                else:
-                    strand = "+"
-                bed_line = accession_number + "\t{0}\t{1}\t{2}\t1000\t{3}\t{0}\t{1}\t65,105,225\n".format(start, stop, name, strand)
-                outf.write(bed_line)
-    outf.close()
 
+	for record in SeqIO.parse(open(file_name, "rU"), "genbank") : #record is genome
+		# add chrom name using split and join('v')
+		ucsc_chrom='v'.join(accession_number.split('.'))
+		# get accession_number from record
+		outf = open( ucsc_chrom +'.bed', 'w')
+		for feature in record.features:
+			if feature.type == 'gene':
+				start = feature.location.start.position
+				stop = feature.location.end.position
+				try:
+					name = feature.qualifiers['gene'][0]
+				except:
+					# some features only have a locus tag
+					name = feature.qualifiers['locus_tag'][0]
+				if feature.strand < 0:
+					strand = "-"
+				else:
+					strand = "+"
+				bed_line = ucsc_chrom + "\t{0}\t{1}\t{2}\t1000\t{3}\n".format(start, stop, name, strand)
+				outf.write(bed_line)
+		outf.close()
 
 if __name__ == '__main__':
-    main()
+	main()
 
-# Run with $ python Write_to_BED.py NC_006273
+# Run with $ python Write_to_BED.py NC_006273.2
