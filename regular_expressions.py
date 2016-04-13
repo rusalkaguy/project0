@@ -36,7 +36,7 @@ q2 = re.compile(r"""
     """, re.VERBOSE)
 
 gene_dict={}
-for line in file_read:
+for line in file_read: # for feature in record=genome, instead of line
     line = line.split('#')[0]
     tab = line.split()  # 'tab' could be any any other variable
     # Split at tabs is default: i.e. empty brackets.
@@ -137,25 +137,36 @@ def format_bed12_line(gene_def_dict):
     score=1000
     item_rgb='0,0,0'
     # columns 7-8 thickStart and thickStop
-    cds_count= len(gene_def_dict['CDS'])
+    cds_def=gene_def_dict['CDS']
+    cds_exon_count= len(cds_def)
     mrna_count=len(gene_def_dict['mRNA'])
     #print 'CDS_count = '+str(cds_count)
-    if cds_count>0 :
-        thick_start = gene_def_dict['CDS'][0]['start']
-        thick_stop = gene_def_dict['CDS'][cds_count-1]['stop']
-
+    if cds_exon_count>0 :
         # compute blockCount    blockSizes  blockStarts
-
         mrna_ouput=[]
         mrna_ouputs=[]
-        # create block size and block start lists
-        # only apply the CDS to the mRNA's that completely contain it.
-        virtual_mrna_list = [gene_def_dict['CDS']] # list of CDS, where CDS is a list of exon_def's
+
+        virtual_mrna_list = [cds_def] # list of CDS, where CDS is a list of exon_def's
+
+        #print('----------cds_def------------------')
+        #pp.pprint(cds_def)
         # when no mRNA is present (mrna_count=0), cds defines block size and start
         if mrna_count>0:
             virtual_mrna_list = gene_def_dict['mRNA']
         for mrna_def in virtual_mrna_list:
+            #print('----------mRNA_def-----------------')
+            #pp.pprint(mrna_def)
             block_count = len(mrna_def) # number of blocks for each mRNA
+            # only apply the CDS to the mRNA's that completely contain it.
+            # Does the CDS start and stop fall within the mRNA start and stop?
+            # If not, then set thick start and stop to be mRNA start and stop.
+            if cds_def[0]['start']<mrna_def[0]['start'] or cds_def[0]['stop']>mrna_def[block_count-1]['stop']:
+                thick_start=mrna_def[0]['start']
+                thick_stop=mrna_def[block_count-1]['stop']
+            else:          
+                thick_start = cds_def[0]['start']
+                thick_stop = cds_def[cds_exon_count-1]['stop']
+
             bed6_str = chrom+'\t'+ mrna_def[0]['start']+'\t'+\
                 mrna_def[block_count-1]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+str(score)+'\t'+\
                 mrna_def[0]['strand']
@@ -164,6 +175,7 @@ def format_bed12_line(gene_def_dict):
             # for m in range(0,mrna_count):
             #print "mrna_def"
             #pp.pprint(mrna_def)
+            # create block size and block start lists
             block_sizes=[] # initialize array of integer sizes
             block_starts=[] # initialize array of integer starts
             for exon_def in mrna_def:
