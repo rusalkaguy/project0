@@ -30,21 +30,10 @@ def main():
 				except:
 					# some features only have a locus tag
 					name = feature.qualifiers['locus_tag'][0]
-				# if feature.strand < 0:
-				# 	strand = "-"
-				# else:
-				# 	strand = "+"
-
-				# Regular expressions identify the complement pattern and join pattern
-				strand = '+'
-				comp_hit = p.match(feature.type) # finds complement at begining of row
-				# did you find complement?
-				if comp_hit:
-					strand = '-'
-					print 'Match found. Span=', ' Group(0)=', comp_hit.group(), 'Group(1)=', comp_hit.group(1)
-					spans= comp_hit.group(1)
-				else:   
-					spans = feature.type
+				if feature.strand < 0:
+					strand = "-"
+				else:
+					strand = "+"
 				bed_line = ucsc_chrom + "\t{0}\t{1}\t{2}\t1000\t{3}\n".format(start, stop, name, strand)
 				outf.write(bed_line)
 		outf.close()
