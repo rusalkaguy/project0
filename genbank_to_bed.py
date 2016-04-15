@@ -68,10 +68,36 @@ def main():
 					strand = "-"
 				else:
 					strand = "+"
+				loc_dict= { 'strand':strand, 'start':start, 'stop':stop}
+				gene_def_dict['gene']=loc_dict
 				bed_line = ucsc_chrom + "\t{0}\t{1}\t{2}\t1000\t{3}\n".format(start, stop, gene_name, strand)
 				outf.write(bed_line)
+			# if feature.type == 'mRNA'
+			# 	#Regular expressions identify the complement pattern and join pattern
+			# 	strand = '+'
+			# 	comp_hit = p.match(str(feature.location)) # finds complement at begining of row
+			# 	# did you find complement?
+			# 	if comp_hit:
+			# 	    strand = '-'
+			# 	    #print 'Match found. Span=', ' Group(0)=', comp_hit.group(), 'Group(1)=', comp_hit.group(1)
+			# 	    spans= comp_hit.group(1)
+			# 	else:   
+			# 	    spans = str(feature.location)
+
+			# 	# use group function --> more efficient because only parse loop once
+			# 	loc_array = [] # make empty array to store strand, start, and stop info
+			# 	# neccessary when more than one exon or CDS region exists for a gene
+			# 	hits = q2.finditer(spans) # returns objects for matches per group
+			# 	for match in hits:
+			# 		print 'finditer found. Span=', ' Group=', match.group()
+			# 		loc_dict={ 'strand':strand, 'start':match.group(1), 'stop':match.group(2)}
+			# 		loc_array.append(loc_dict)
+			# 	#print loc_dict
+
+
 		outf.close()
-	pp.pprint(gene_dict)
+	for key in gene_dict:
+		pp.pprint(gene_dict[key])
 
 if __name__ == '__main__':
 	main()
