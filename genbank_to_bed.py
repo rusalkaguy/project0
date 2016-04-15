@@ -48,25 +48,31 @@ def main():
 		ucsc_chrom='v'.join(accession_number.split('.'))
 		# get accession_number from record
 		outf = open( ucsc_chrom +'.bed', 'w')
-		gene_dict={}
-		for feature in record.features: # record is genome,
+		gene_dict={} # Initialize outermost dictionary
+		for feature in record.features: # record is genome
 			if feature.type == 'gene':
 				start = feature.location.start.position
-				stop = feature.location.end.position
+			 	stop = feature.location.end.position
 				try:
-					name = feature.qualifiers['gene'][0]
+					gene_name=feature.qualifiers['gene'][0]
 				except:
 					# some features only have a locus tag
-					name = feature.qualifiers['locus_tag'][0]
+					gene_name = feature.qualifiers['locus_tag'][0]
+				# Check to see if gene exits in dictionary
+				if gene_name not in gene_dict: # if gene not in dict,
+					gene_dict[gene_name]={'gene_name': gene_name} # set dictionary and store gene_name to process later
+					#gene_dict[gene_name]['gene_name']=gene_name
+				# Set gene_dict to key-value pair {gene_name:gene_def_dict} 
+				gene_def_dict = gene_dict[gene_name]
 				if feature.strand < 0:
 					strand = "-"
 				else:
 					strand = "+"
-				bed_line = ucsc_chrom + "\t{0}\t{1}\t{2}\t1000\t{3}\n".format(start, stop, name, strand)
+				bed_line = ucsc_chrom + "\t{0}\t{1}\t{2}\t1000\t{3}\n".format(start, stop, gene_name, strand)
 				outf.write(bed_line)
 		outf.close()
+	pp.pprint(gene_dict)
 
 if __name__ == '__main__':
 	main()
-
 # Run with $ python write_to_bed.py NC_006273.2
