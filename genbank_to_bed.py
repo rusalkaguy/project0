@@ -141,15 +141,15 @@ def genbank_to_dictionary():
 				gene_dict[gene_name]=gene_def_dict
 			
 		outf.close()
-	for key in gene_dict:
-		pp.pprint(gene_dict)
+	#for key in gene_dict:
+	#	pp.pprint(gene_dict)
 	return gene_dict
 
 
 # create the first 6 columns (easy) and columns 7/8 (more interesting)
 def format_bed6_line(gene_dict): 
-	gene_def_dict=gene_dict[key]
-	for key in gene_def_dict:
+	
+	for key in gene_dict:
 	# first 6 columns: 
 	# how do i fix 'chrom','name', and 'score' without using variables in the function?
 	# either make def more specific or call info outside of def and for loop, to later incoorporate
@@ -165,68 +165,69 @@ rgb='0,0,0'
 
 # change gene_def_dict to gene_dict[key]
 def format_bed12_line(gene_dict):
-	gene_def_dict=gene_dict[key]
-	for key in gene_def_dict:
+	
+	for key in gene_dict:
+		gene_def_dict=gene_dict[key]
 
 	    #pp.pprint(gene_def_dict)
 	    # column 9:itemRgb
-	    score=1000
-	    item_rgb='0,0,0'
-	    # columns 7-8 thickStart and thickStop
-	    cds_def=gene_def_dict['CDS']
-	    cds_exon_count= len(cds_def)
-	    mrna_count=len(gene_def_dict['mRNA'])
-	    #print 'CDS_count = '+str(cds_count)
-	    if cds_exon_count>0 :
-	        # compute blockCount    blockSizes  blockStarts
-	        mrna_ouput=[]
-	        mrna_ouputs=[]
+		score=1000
+		item_rgb='0,0,0'
+		# columns 7-8 thickStart and thickStop
+		cds_def=gene_def_dict['CDS']
+		cds_exon_count= len(cds_def)
+		mrna_count=len(gene_def_dict['mRNA'])
+		#print 'CDS_count = '+str(cds_count)
+		if cds_exon_count>0 :
+			# compute blockCount    blockSizes  blockStarts
+			mrna_ouput=[]
+			mrna_ouputs=[]
 
-	        virtual_mrna_list = [cds_def] # list of CDS, where CDS is a list of exon_def's
+			virtual_mrna_list = [cds_def] # list of CDS, where CDS is a list of exon_def's
 
-	        #print('----------cds_def------------------')
-	        #pp.pprint(cds_def)
-	        # when no mRNA is present (mrna_count=0), cds defines block size and start
-	        if mrna_count>0:
-	            virtual_mrna_list = gene_def_dict['mRNA']
-	        for mrna_def in virtual_mrna_list:
-	            block_count = len(mrna_def) # number of blocks for each mRNA
-	            # only apply the CDS to the mRNA's that completely contain it.
-	            # Does the CDS start and stop fall within the mRNA start and stop?
-	            # If not, then set thick start and stop to be mRNA start and stop.
-	            if cds_def[0]['start']<mrna_def[0]['start'] or cds_def[0]['stop']>mrna_def[block_count-1]['stop']:
-	                thick_start=mrna_def[0]['start']
-	                thick_stop=mrna_def[block_count-1]['stop']
-	            else:          
-	                thick_start = cds_def[0]['start']
-	                thick_stop = cds_def[cds_exon_count-1]['stop']
+			#print('----------cds_def------------------')
+			#pp.pprint(cds_def)
+			# when no mRNA is present (mrna_count=0), cds defines block size and start
+			if mrna_count>0:
+				virtual_mrna_list = gene_def_dict['mRNA']
+			for mrna_def in virtual_mrna_list:
+				block_count = len(mrna_def) # number of blocks for each mRNA
+				# only apply the CDS to the mRNA's that completely contain it.
+				# Does the CDS start and stop fall within the mRNA start and stop?
+				# If not, then set thick start and stop to be mRNA start and stop.
+				if cds_def[0]['start']<mrna_def[0]['start'] or cds_def[0]['stop']>mrna_def[block_count-1]['stop']:
+					thick_start=mrna_def[0]['start']
+					thick_stop=mrna_def[block_count-1]['stop']
+				else:          
+					thick_start = cds_def[0]['start']
+					thick_stop = cds_def[cds_exon_count-1]['stop']
 
-	            bed6_str = ucsc_chrom+'\t'+ mrna_def[0]['start']+'\t'+\
-	                mrna_def[block_count-1]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+str(score)+'\t'+\
-	                mrna_def[0]['strand']
+				bed6_str = ucsc_chrom+'\t'+ mrna_def[0]['start']+'\t'+\
+					mrna_def[block_count-1]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+str(score)+'\t'+\
+					mrna_def[0]['strand']
 
-	            # If there are 2 mRNAs, we need to output 2 lines in the bed file
-	            # for m in range(0,mrna_count):
-	            #print "mrna_def"
-	            #pp.pprint(mrna_def)
-	            # create block size and block start lists
-	            block_sizes=[] # initialize array of integer sizes
-	            block_starts=[] # initialize array of integer starts
-	            for exon_def in mrna_def:
-	                #print "exon_def"
-	                #pp.pprint(exon_def)
-	                #print mrna_def[0]['start']
-	                block_size= str(int(exon_def['stop'])-int(exon_def['start']))
-	                block_sizes.append(block_size)
-	                block_start= str(int(exon_def['start'])-int(mrna_def[0]['start']))                
-	                block_starts.append(block_start)
+				# If there are 2 mRNAs, we need to output 2 lines in the bed file
+				# for m in range(0,mrna_count):
+				#print "mrna_def"
+				#pp.pprint(mrna_def)
+				# create block size and block start lists
+				block_sizes=[] # initialize array of integer sizes
+				block_starts=[] # initialize array of integer starts
+				for exon_def in mrna_def:
+					#print "exon_def"
+					#pp.pprint(exon_def)
+					#print mrna_def[0]['start']
+					block_size= str(int(exon_def['stop'])-int(exon_def['start']))
+					block_sizes.append(block_size)
+					block_start= str(int(exon_def['start'])-int(mrna_def[0]['start']))                
+					block_starts.append(block_start)
 
-	            block_sizes_str=','.join(block_sizes)
-	            block_starts_str=','.join(block_starts)
-	            # format thickStart and thickEnd columns 7 and 8 and blocks
-	            mrna_ouput='\t'.join([bed6_str, thick_start, thick_stop, rgb, str(block_count), block_sizes_str, block_starts_str])
-	            mrna_ouputs.append(mrna_ouput)
-	        return '\n'.join(mrna_ouputs) 
+				block_sizes_str=','.join(block_sizes)
+				block_starts_str=','.join(block_starts)
+				# format thickStart and thickEnd columns 7 and 8 and blocks
+				mrna_ouput='\t'.join([bed6_str, thick_start, thick_stop, rgb, str(block_count), block_sizes_str, block_starts_str])
+				mrna_ouputs.append(mrna_ouput)
+			return '\n'.join(mrna_ouputs) 
 
 def write_bed_12_line_to_bed_file(gene_dict):
 	# Write the formatted information to a new bed file.
@@ -235,10 +236,10 @@ def write_bed_12_line_to_bed_file(gene_dict):
 	# 'w' creates the file if the file does not exist, but it will truncate the existing file
 
 	for key in gene_dict:
-	    #print '-----------key of gene_dict-------------'
-	    #print key
-	    print format_bed12_line(gene_dict[key])
-	    bed_file.write(format_bed12_line(gene_dict[key])+'\n')
+		#print '-----------key of gene_dict-------------'
+		#print key
+		print format_bed12_line(gene_dict[key])
+		bed_file.write(format_bed12_line(gene_dict[key])+'\n')
 
 	# Close the original opened text file
 	file_open.close;
@@ -246,5 +247,5 @@ def write_bed_12_line_to_bed_file(gene_dict):
 	bed_file.close
 
 if __name__ == '__main__':
-	genbank_to_dictionary()
+	genbank_to_dictionary(format_bed12_line(write_bed_12_line_to_bed_file))
 # Run with $ python genbank_to_bed.py NC_006273.2
