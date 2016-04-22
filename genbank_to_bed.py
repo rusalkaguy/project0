@@ -147,9 +147,8 @@ def genbank_to_dictionary():
 
 
 # create the first 6 columns (easy) and columns 7/8 (more interesting)
-def format_bed6_line(gene_dict): 
+def format_bed6_line(gene_def_dict): 
 	
-	for key in gene_dict:
 	# first 6 columns: 
 	# how do i fix 'chrom','name', and 'score' without using variables in the function?
 	# either make def more specific or call info outside of def and for loop, to later incoorporate
@@ -165,18 +164,16 @@ rgb='0,0,0'
 
 # change gene_def_dict to gene_dict[key]
 def format_bed12_line(gene_dict):
-	
 	for key in gene_dict:
-		gene_def_dict=gene_dict[key]
-
-	    #pp.pprint(gene_def_dict)
-	    # column 9:itemRgb
+		
+		pp.pprint(gene_dict[key])
+		# column 9:itemRgb
 		score=1000
 		item_rgb='0,0,0'
 		# columns 7-8 thickStart and thickStop
-		cds_def=gene_def_dict['CDS']
+		cds_def=gene_dict[key]['CDS']
 		cds_exon_count= len(cds_def)
-		mrna_count=len(gene_def_dict['mRNA'])
+		mrna_count=len(gene_dict[key]['mRNA'])
 		#print 'CDS_count = '+str(cds_count)
 		if cds_exon_count>0 :
 			# compute blockCount    blockSizes  blockStarts
@@ -189,7 +186,7 @@ def format_bed12_line(gene_dict):
 			#pp.pprint(cds_def)
 			# when no mRNA is present (mrna_count=0), cds defines block size and start
 			if mrna_count>0:
-				virtual_mrna_list = gene_def_dict['mRNA']
+				virtual_mrna_list = gene_dict[key]['mRNA']
 			for mrna_def in virtual_mrna_list:
 				block_count = len(mrna_def) # number of blocks for each mRNA
 				# only apply the CDS to the mRNA's that completely contain it.
@@ -203,7 +200,7 @@ def format_bed12_line(gene_dict):
 					thick_stop = cds_def[cds_exon_count-1]['stop']
 
 				bed6_str = ucsc_chrom+'\t'+ mrna_def[0]['start']+'\t'+\
-					mrna_def[block_count-1]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+str(score)+'\t'+\
+					mrna_def[block_count-1]['stop']+'\t'+gene_dict[key]['gene_name']+'\t'+str(score)+'\t'+\
 					mrna_def[0]['strand']
 
 				# If there are 2 mRNAs, we need to output 2 lines in the bed file
@@ -237,7 +234,6 @@ def write_bed_12_line_to_bed_file(gene_dict):
 
 	for key in gene_dict:
 		#print '-----------key of gene_dict-------------'
-		#print key
 		print format_bed12_line(gene_dict[key])
 		bed_file.write(format_bed12_line(gene_dict[key])+'\n')
 
@@ -247,5 +243,5 @@ def write_bed_12_line_to_bed_file(gene_dict):
 	bed_file.close
 
 if __name__ == '__main__':
-	genbank_to_dictionary(format_bed12_line(write_bed_12_line_to_bed_file))
+	write_bed_12_line_to_bed_file(genbank_to_dictionary())
 # Run with $ python genbank_to_bed.py NC_006273.2
