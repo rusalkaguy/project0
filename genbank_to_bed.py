@@ -10,7 +10,7 @@ accession_number = argv[1] # Upacks argv-> assigned to 1 variable you can work w
 file_name = accession_number + '.gbk'
 ucsc_chrom='v'.join(accession_number.split('.'))
 db = 'nucleotide' 
-debug_parsing = 1
+debug_parsing = 0
 
 # Write Genbank File to BED file format: https://gist.github.com/brantfaircloth/893580
 from Bio import SeqIO
@@ -148,7 +148,7 @@ def genbank_to_dictionary():
 					print "mRNA: append to mRNA array"
 					gene_def_dict['mRNA'].append(loc_array)
 
-				if debug_parsing: 
+				if debug_parsing>1: 
 					pp.pprint(gene_def_dict)
 	#pp.pprint(gene_dict)
 	if debug_parsing > 1: 
