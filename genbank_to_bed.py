@@ -10,11 +10,11 @@ accession_number = argv[1] # Upacks argv-> assigned to 1 variable you can work w
 file_name = accession_number + '.gbk'
 ucsc_chrom='v'.join(accession_number.split('.'))
 db = 'nucleotide' 
-debug_parsing = 0
+debug_parsing = 1
 
 # Write Genbank File to BED file format: https://gist.github.com/brantfaircloth/893580
 from Bio import SeqIO
-
+from Bio.SeqFeature import SeqFeature, FeatureLocation, CompoundLocation
 import pdb
 
 # Import regular expressions
@@ -44,15 +44,30 @@ q2 = re.compile(r"""
     """, re.VERBOSE)
 
 def loc_dict_to_exon_array(feature):
-	loc=feature.location
-	start = loc.start.position
-	stop = loc.end.position
 	if feature.strand < 0:
 		strand = "-"
 	else:
 		strand = "+"
-	loc_dict= { 'strand':strand, 'start':start, 'stop':stop}
 	exon_array=[]
+
+	#print "is location", isinstance(feature.location, FeatureLocation)
+	#print "is compound", isinstance(feature.location, CompoundLocation)
+	# http://biopython.org/DIST/docs/api/Bio.SeqFeature-pysrc.html
+	if isinstance(feature.location, CompoundLocation):
+		for featureLocation in feature.location.parts:
+
+			loc=featureLocation
+			start = loc.start
+			stop = loc.end
+			loc_dict= { 'strand':strand, 'start':start, 'stop':stop}	
+
+	else:
+		loc=feature.location
+		start = loc.start.position
+		stop = loc.end.position
+		loc_dict= { 'strand':strand, 'start':start, 'stop':stop}	
+
+
 	exon_array.append(loc_dict)
 	return exon_array
 			
@@ -67,14 +82,6 @@ def genbank_to_dictionary():
 		gene_dict={} # Initialize outermost dictionary
 		count=0
 		for feature in record.features: # record is genome
-			# quit after Nth gene
-			if feature.type == 'gene':
-				# counter
-				count+=1
-				if debug_parsing and count>9:
-					break
-
-
 
 			if feature.type in ['gene','CDS','mRNA']:
 				#
@@ -86,6 +93,22 @@ def genbank_to_dictionary():
 					# some features only have a locus tag
 					gene_name = feature.qualifiers['locus_tag'][0]
 				# Check to see if gene exits in dictionary
+
+				if feature.type == 'gene':
+					# counter
+					count+=1
+
+				if debug_parsing:
+					# hack to only parse one gene
+				 	if gene_name not in ["UL122"]:
+						print "skipping ", gene_name
+						continue
+					else:
+						print "FOUND IT", gene_name
+					# quit after Nth gene
+					if debug_parsing > 1 and count>9:
+						break
+
 				if gene_name not in gene_dict: # if gene not in dict,
 					gene_dict[gene_name]={'gene_name': gene_name, 'mRNA': [], 'CDS' :[] } # set dictionary and store gene_name to process later
 					#gene_dict[gene_name]['gene_name']=gene_name
@@ -136,8 +159,6 @@ def genbank_to_dictionary():
 def format_bed6_line(gene_def_dict): 
 	
 	# first 6 columns: 
-	# how do i fix 'chrom','name', and 'score' without using variables in the function?
-	# either make def more specific or call info outside of def and for loop, to later incoorporate
 	return ucsc_chrom+'\t'+ gene_def_dict['gene'][0]['start']+'\t'+\
 		gene_def_dict['gene'][0]['stop']+'\t'+gene_def_dict['gene_name']+'\t'+'score'+'\t'+\
 		gene_def_dict['gene'][0]['strand']
