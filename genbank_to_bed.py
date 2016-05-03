@@ -57,18 +57,18 @@ def loc_dict_to_exon_array(feature):
 		for featureLocation in feature.location.parts:
 
 			loc=featureLocation
-			start = loc.start
-			stop = loc.end
+			start = loc.start.position
+			stop = loc.end.position
 			loc_dict= { 'strand':strand, 'start':start, 'stop':stop}	
+			exon_array.append(loc_dict)
 
 	else:
 		loc=feature.location
 		start = loc.start.position
 		stop = loc.end.position
 		loc_dict= { 'strand':strand, 'start':start, 'stop':stop}	
+		exon_array.append(loc_dict)
 
-
-	exon_array.append(loc_dict)
 	return exon_array
 			
 
@@ -117,6 +117,7 @@ def genbank_to_dictionary():
 				gene_def_dict = gene_dict[gene_name]
 
 				# parse feature's location into an array of arrays of exon_defs
+				# change loc_dict_to_exon_array function to create and pass back loc_array
 				loc_array=loc_dict_to_exon_array(feature)
 
 				if debug_parsing: 
@@ -225,9 +226,9 @@ def write_gene_def_to_bed12(gene_def_dict):
 				#print "exon_def"
 				#pp.pprint(exon_def)
 				#print mrna_def[0]['start']
-				block_size= str(int(exon_def['stop'])-int(exon_def['start']))
+				block_size= str(abs(int(exon_def['stop'])-int(exon_def['start'])))
 				block_sizes.append(block_size)
-				block_start= str(int(exon_def['start'])-int(mrna_def[0]['start']))                
+				block_start= str(abs(int(exon_def['start'])-int(mrna_def[0]['start'])))                
 				block_starts.append(block_start)
 
 			block_sizes_str=','.join(block_sizes)
