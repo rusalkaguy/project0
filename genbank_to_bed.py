@@ -39,7 +39,7 @@ q = re.compile(r"""
 
 q2 = re.compile(r"""
     ([0-9]+)       # 1 or more(+) of any number
-    \.\.         # .. \ denotes not anything (.)
+    \.\.           # .. \ denotes not anything (.)
     ([0-9]+)       # 1 or more(+) of any number
     """, re.VERBOSE)
 
@@ -117,7 +117,6 @@ def genbank_to_dictionary():
 				gene_def_dict = gene_dict[gene_name]
 
 				# parse feature's location into an array of arrays of exon_defs
-				# change loc_dict_to_exon_array function to create and pass back loc_array
 				loc_array=loc_dict_to_exon_array(feature)
 
 				if debug_parsing: 
@@ -130,11 +129,8 @@ def genbank_to_dictionary():
 
 					# call subroutine to convert location to array of dictionary
 					#print (loc_dict_to_exon_array(feature.location))
-					gene_def_dict['gene']=loc_array[0]								#start=gene_def_dict['gene']['start']
-					#stop=gene_def_dict['gene']['stop']
-					#strand=gene_def_dict['gene']['strand']
-					#bed_line6 = ucsc_chrom + "\t{0}\t{1}\t{2}\t1000\t{3}\t".format(start, stop, gene_name, strand)
-					#outf.write(bed_line6)
+					gene_def_dict['gene']=loc_array[0]	
+
 					if 'mRNA' not in gene_def_dict:
 						gene_def_dict['mRNA']=[]
 				# Could add similar if statement block for regulatory regions if helpful
@@ -216,9 +212,6 @@ def write_gene_def_to_bed12(gene_def_dict):
 				str(mrna_def[0]['strand'])
 
 			# If there are 2 mRNAs, we need to output 2 lines in the bed file
-			# for m in range(0,mrna_count):
-			#print "mrna_def"
-			#pp.pprint(mrna_def)
 			# create block size and block start lists
 			block_sizes=[] # initialize array of integer sizes
 			block_starts=[] # initialize array of integer starts
@@ -226,9 +219,9 @@ def write_gene_def_to_bed12(gene_def_dict):
 				#print "exon_def"
 				#pp.pprint(exon_def)
 				#print mrna_def[0]['start']
-				block_size= str(abs(int(exon_def['stop'])-int(exon_def['start'])))
+				block_size= str(int(exon_def['stop'])-int(exon_def['start']))
 				block_sizes.append(block_size)
-				block_start= str(abs(int(exon_def['start'])-int(mrna_def[0]['start'])))                
+				block_start= str(int(exon_def['start'])-int(mrna_def[0]['start']))              
 				block_starts.append(block_start)
 
 			block_sizes_str=','.join(block_sizes)
@@ -246,15 +239,25 @@ def write_bed_12_line_to_bed_file(gene_dict):
 	# 'w' creates the file if the file does not exist, but it will truncate the existing file
 	print(gene_dict.keys())
 	for gene_name in gene_dict:
-		print ('------gene_name=',gene_name,'--------')
+		#print ('------gene_name=',gene_name,'--------')
 		gene_def_dict = gene_dict[gene_name]
 		print write_gene_def_to_bed12(gene_def_dict)  # pass definition for a gene to sub routine.
 		bed_file.write(write_gene_def_to_bed12(gene_def_dict)+'\n')
-
 
 	# Close the newly written bed file
 	bed_file.close
 
 if __name__ == '__main__':
 	write_bed_12_line_to_bed_file(genbank_to_dictionary())
+
+file_open = open ("bed_file.bed", "r+")
+file_read = file_open.readlines()
+file_open.close()
+file_open = open ("bed_file.bed", "w")
+for line in file_read:
+	if len(line.strip())==0:
+		continue
+	file_open.write(line)
+
+
 # Run with $ python genbank_to_bed.py NC_006273.2
