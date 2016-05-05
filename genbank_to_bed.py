@@ -197,6 +197,10 @@ def write_gene_def_to_bed12(gene_def_dict):
 		if mrna_count>0:
 			virtual_mrna_list = gene_def_dict['mRNA']
 		for mrna_def in virtual_mrna_list:
+			min_start_pos=sorted(mrna_def, key=lambda x:x['start'])[0]['start']
+			max_stop_pos=sorted(mrna_def, key=lambda x:x['stop'])[-1]['stop']
+			chrom_start = min_start_pos
+			chrom_stop = max_stop_pos
 			block_count = len(mrna_def) # number of blocks for each mRNA
 			# only apply the CDS to the mRNA's that completely contain it.
 			# Does the CDS start and stop fall within the mRNA start and stop?
@@ -218,11 +222,11 @@ def write_gene_def_to_bed12(gene_def_dict):
 
 			thick_start_str=str(thick_start)
 			thick_stop_str=str(thick_stop)
-			print "-----thick_start_str="+thick_start_str+"-----"
-			print "-----thick_stop_str="+thick_stop_str+"-----"
+			#print "-----thick_start_str="+thick_start_str+"-----"
+			#print "-----thick_stop_str="+thick_stop_str+"-----"
 
-			bed6_str = ucsc_chrom+'\t'+ str(mrna_def[0]['start'])+'\t'+\
-				str(mrna_def[block_count-1]['stop'])+'\t'+str(gene_def_dict['gene_name'])+'\t'+str(score)+'\t'+\
+			bed6_str = ucsc_chrom+'\t'+ str(chrom_start)+'\t'+\
+				str(chrom_stop)+'\t'+str(gene_def_dict['gene_name'])+'\t'+str(score)+'\t'+\
 				str(mrna_def[0]['strand'])
 
 			# If there are 2 mRNAs, we need to output 2 lines in the bed file
