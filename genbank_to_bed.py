@@ -55,7 +55,6 @@ def loc_dict_to_exon_array(feature):
 	# http://biopython.org/DIST/docs/api/Bio.SeqFeature-pysrc.html
 	if isinstance(feature.location, CompoundLocation):
 		for featureLocation in feature.location.parts:
-
 			loc=featureLocation
 			start = loc.start.position
 			stop = loc.end.position
@@ -66,6 +65,10 @@ def loc_dict_to_exon_array(feature):
 		loc=feature.location
 		start = loc.start.position
 		stop = loc.end.position
+		if int(start) > int(stop):
+			print 'reverse start and stop'
+			start = loc.end.position
+			stop = loc.start.position
 		loc_dict= { 'strand':strand, 'start':start, 'stop':stop}	
 		exon_array.append(loc_dict)
 
@@ -199,13 +202,24 @@ def write_gene_def_to_bed12(gene_def_dict):
 			# Does the CDS start and stop fall within the mRNA start and stop?
 			# If not, then set thick start and stop to be mRNA start and stop.
 			if cds_def[0]['start']<mrna_def[0]['start'] or cds_def[0]['stop']>mrna_def[block_count-1]['stop']:
-				thick_start=mrna_def[0]['start']
-				thick_stop=mrna_def[block_count-1]['stop']
-			else:          
-				thick_start = cds_def[0]['start']
-				thick_stop = cds_def[cds_exon_count-1]['stop']
+				# sort cds_def by start and end values
+				# choose min start and max end
+				min_start_pos=sorted(mrna_def, key=lambda x:x['start'])[0]['start']
+				max_stop_pos=sorted(mrna_def, key=lambda x:x['stop'])[-1]['stop']
+				thick_start = min_start_pos
+				thick_stop = max_stop_pos
+			else:
+				# sort cds_def by start and end values
+				# choose min start and max end
+				min_start_pos=sorted(cds_def, key=lambda x:x['start'])[0]['start']
+				max_stop_pos=sorted(cds_def, key=lambda x:x['stop'])[-1]['stop']
+				thick_start = min_start_pos
+				thick_stop = max_stop_pos
+
 			thick_start_str=str(thick_start)
 			thick_stop_str=str(thick_stop)
+			print "-----thick_start_str="+thick_start_str+"-----"
+			print "-----thick_stop_str="+thick_stop_str+"-----"
 
 			bed6_str = ucsc_chrom+'\t'+ str(mrna_def[0]['start'])+'\t'+\
 				str(mrna_def[block_count-1]['stop'])+'\t'+str(gene_def_dict['gene_name'])+'\t'+str(score)+'\t'+\
@@ -227,7 +241,7 @@ def write_gene_def_to_bed12(gene_def_dict):
 			block_sizes_str=','.join(block_sizes)
 			block_starts_str=','.join(block_starts)
 			# format thickStart and thickEnd columns 7 and 8 and blocks
-			mrna_ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, str(block_count), block_sizes_str, block_starts_str])
+			mrna_ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, str(block_count), block_starts_str, block_sizes_str])
 			mrna_ouputs.append(mrna_ouput)
 	return '\n'.join(mrna_ouputs) 
 
