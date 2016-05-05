@@ -230,7 +230,8 @@ def write_gene_def_to_bed12(gene_def_dict):
 			# create block size and block start lists
 			block_sizes=[] # initialize array of integer sizes
 			block_starts=[] # initialize array of integer starts
-			for exon_def in mrna_def:
+			sorted_mrna_def=sorted(mrna_def, key=lambda x:x['start'])
+			for exon_def in sorted_mrna_def:
 				#print "exon_def"
 				#pp.pprint(exon_def)
 				#print mrna_def[0]['start']
@@ -274,5 +275,5 @@ for line in file_read:
 		continue
 	file_open.write(line)
 
-
+file_open.close()
 # Run with $ python genbank_to_bed.py NC_006273.2
