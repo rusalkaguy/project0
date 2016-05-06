@@ -49,10 +49,8 @@ def loc_dict_to_exon_array(feature):
 	else:
 		strand = "+"
 	exon_array=[]
-
-	#print "is location", isinstance(feature.location, FeatureLocation)
-	#print "is compound", isinstance(feature.location, CompoundLocation)
-	# http://biopython.org/DIST/docs/api/Bio.SeqFeature-pysrc.html
+	# Check if the location of the feature has more is a join of more than 1 pair of start and stop positions
+	# Occurs when multiple mRNA and/or CDS are present
 	if isinstance(feature.location, CompoundLocation):
 		for featureLocation in feature.location.parts:
 			loc=featureLocation
@@ -60,15 +58,11 @@ def loc_dict_to_exon_array(feature):
 			stop = loc.end.position
 			loc_dict= { 'strand':strand, 'start':start, 'stop':stop}	
 			exon_array.append(loc_dict)
-
-	else:
+	# When only one pair of start and stop positions is present or no join
+	else: # no need to iterate through each segment
 		loc=feature.location
 		start = loc.start.position
 		stop = loc.end.position
-		if int(start) > int(stop):
-			print 'reverse start and stop'
-			start = loc.end.position
-			stop = loc.start.position
 		loc_dict= { 'strand':strand, 'start':start, 'stop':stop}	
 		exon_array.append(loc_dict)
 
@@ -126,7 +120,7 @@ def genbank_to_dictionary():
 					print "\n---------- ", gene_name, feature.type, "----------"
 
 				#
-				# now feature type specific processing
+				# Feature type specific processing
 				#
 				if feature.type == 'gene':
 
@@ -171,7 +165,7 @@ rgb='0,0,0'
 # change gene_def_dict to gene_dict[key]
 def write_gene_def_to_bed12(gene_def_dict):
 	
-	pp.pprint(gene_def_dict)
+	#pp.pprint(gene_def_dict)
 	# column 9:itemRgb
 	score=1000
 	item_rgb='0,0,0'
@@ -191,8 +185,8 @@ def write_gene_def_to_bed12(gene_def_dict):
 
 		virtual_mrna_list = [cds_def] # list of CDS, where CDS is a list of exon_def's
 
-		#print('----------cds_def------------------')
-		#pp.pprint(cds_def)
+		print('----------cds_def------------------')
+		pp.pprint(cds_def)
 		# when no mRNA is present (mrna_count=0), cds defines block size and start
 		if mrna_count>0:
 			virtual_mrna_list = gene_def_dict['mRNA']
@@ -206,14 +200,14 @@ def write_gene_def_to_bed12(gene_def_dict):
 			# only apply the CDS to the mRNA's that completely contain it.
 			# Does the CDS start and stop fall within the mRNA start and stop?
 			# If not, then set thick start and stop to be mRNA start and stop.
-			if cds_def[0]['start']<mrna_def[0]['start'] or cds_def[0]['stop']>mrna_def[block_count-1]['stop']:
+			# sort cds_def by start and end values
+			# choose min start and max end
+			min_start_cds_pos=sorted(cds_def, key=lambda x:x['start'])[0]['start']
+			max_stop_cds_pos=sorted(cds_def, key=lambda x:x['stop'])[-1]['stop']
+			if min_start_cds_pos < min_start_mrna_pos or max_stop_cds_pos > max_stop_mrna_pos:
 				thick_start = min_start_mrna_pos
 				thick_stop = max_stop_mrna_pos
 			else:
-				# sort cds_def by start and end values
-				# choose min start and max end
-				min_start_cds_pos=sorted(cds_def, key=lambda x:x['start'])[0]['start']
-				max_stop_cds_pos=sorted(cds_def, key=lambda x:x['stop'])[-1]['stop']
 				thick_start = min_start_cds_pos
 				thick_stop = max_stop_cds_pos
 
@@ -239,7 +233,16 @@ def write_gene_def_to_bed12(gene_def_dict):
 				block_starts.append(block_start)
 				block_size= str(int(exon_def['stop'])-int(exon_def['start']))
 				block_sizes.append(block_size)
+			# final blockStartposition plus the final blockSize value must equal chromEnd
+			if block_start+ block_size == chrom_stop:
+				print ' YES! block_start + block size == chrom_stop'
 
+			else:
+				print ' NO! block_start + block size ~= chrom_stop'
+				print '		 block_start ='+block_start
+				print '		 block_size ='+block_size
+				print '		block_start + block size ='+str(int(block_start)+int(block_size))
+				print '		 chrom_stop ='+str(chrom_stop)
 			block_sizes_str=','.join(block_sizes)
 			block_starts_str=','.join(block_starts)
 			# format thickStart and thickEnd columns 7 and 8 and blocks
@@ -253,7 +256,7 @@ def write_bed_12_line_to_bed_file(gene_dict):
 	bed_file= open('bed_file.bed','w') 
 	# 'a' creates new file if it does not exist and does not truncate the file if it does exist
 	# 'w' creates the file if the file does not exist, but it will truncate the existing file
-	print(gene_dict.keys())
+	#print(gene_dict.keys())
 	for gene_name in gene_dict:
 		#print ('------gene_name=',gene_name,'--------')
 		gene_def_dict = gene_dict[gene_name]
