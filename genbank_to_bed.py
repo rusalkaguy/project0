@@ -165,7 +165,7 @@ rgb='0,0,0'
 # change gene_def_dict to gene_dict[key]
 def write_gene_def_to_bed12(gene_def_dict):
 	
-	#pp.pprint(gene_def_dict)
+	pp.pprint(gene_def_dict)
 	# column 9:itemRgb
 	score=1000
 	item_rgb='0,0,0'
@@ -204,7 +204,12 @@ def write_gene_def_to_bed12(gene_def_dict):
 			# choose min start and max end
 			min_start_cds_pos=sorted(cds_def, key=lambda x:x['start'])[0]['start']
 			max_stop_cds_pos=sorted(cds_def, key=lambda x:x['stop'])[-1]['stop']
-			if min_start_cds_pos < min_start_mrna_pos or max_stop_cds_pos > max_stop_mrna_pos:
+			'''
+			sorted_start_cds_def=sorted(cds_def, key=lambda x:x['start'])
+			sorted_stop_cds_def=sorted(cds_def, key=lambda x:x['stop'])
+			'''
+			if cds_def[0]['start']<mrna_def[0]['start'] or cds_def[0]['stop']>mrna_def[block_count-1]['stop']:
+			#if min_start_cds_pos < min_start_mrna_pos or max_stop_cds_pos > max_stop_mrna_pos:
 				thick_start = min_start_mrna_pos
 				thick_stop = max_stop_mrna_pos
 			else:
@@ -233,16 +238,16 @@ def write_gene_def_to_bed12(gene_def_dict):
 				block_starts.append(block_start)
 				block_size= str(int(exon_def['stop'])-int(exon_def['start']))
 				block_sizes.append(block_size)
-			# final blockStartposition plus the final blockSize value must equal chromEnd
-			if block_start+ block_size == chrom_stop:
-				print ' YES! block_start + block size == chrom_stop'
-
-			else:
-				print ' NO! block_start + block size ~= chrom_stop'
-				print '		 block_start ='+block_start
-				print '		 block_size ='+block_size
-				print '		block_start + block size ='+str(int(block_start)+int(block_size))
-				print '		 chrom_stop ='+str(chrom_stop)
+			if debug_parsing>2:
+				# final blockStartposition plus the final blockSize value must equal chromEnd
+				if int(chrom_start) + int(block_start) + int(block_size) == int(chrom_stop):
+					print ' YES! chrom_start+ block_start + block size == chrom_stop'
+				else:
+					print ' NO! chrom_start + block_start + block size ~= chrom_stop'
+					print '		 block_start ='+block_start
+					print '		 block_size ='+block_size
+					print '		chrom_start + block_start + block size ='+str(int(chrom_start)+int(block_start)+int(block_size))
+					print '		 chrom_stop ='+str(chrom_stop)
 			block_sizes_str=','.join(block_sizes)
 			block_starts_str=','.join(block_starts)
 			# format thickStart and thickEnd columns 7 and 8 and blocks
