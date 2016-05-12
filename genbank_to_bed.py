@@ -172,7 +172,10 @@ def write_gene_def_to_bed12(gene_def_dict):
 	# columns 7-8 thickStart and thickStop
 	cds_def=gene_def_dict['CDS']
 	cds_exon_count= len(cds_def)
-	mrna_count=len(gene_def_dict['mRNA'])
+	mrna_def= gene_def_dict['mRNA']
+	mrna_count=len(mrna_def)
+	if mrna_count== 1:
+		mrna_count=len(mrna_def[0])
 
 	# default empty output
 	mrna_ouputs = []
@@ -185,11 +188,13 @@ def write_gene_def_to_bed12(gene_def_dict):
 
 		virtual_mrna_list = [cds_def] # list of CDS, where CDS is a list of exon_def's
 
-		print('----------cds_def------------------')
-		pp.pprint(cds_def)
+		#print('----------cds_def------------------')
+		#pp.pprint(cds_def)
+		print 'mrna_count='+str(mrna_count)
 		# when no mRNA is present (mrna_count=0), cds defines block size and start
 		if mrna_count>0:
 			virtual_mrna_list = gene_def_dict['mRNA']
+			pp.pprint ('virtual_mrna_list='+ str(virtual_mrna_list))
 		for mrna_def in virtual_mrna_list:
 			# sort cds_def by start and end values and choose min start and max end
 			min_start_mrna_pos=sorted(mrna_def, key=lambda x:x['start'])[0]['start']
@@ -229,8 +234,9 @@ def write_gene_def_to_bed12(gene_def_dict):
 			# create block size and block start lists
 			block_sizes=[] # initialize array of integer sizes
 			block_starts=[] # initialize array of integer starts
-			sorted_mrna_def=sorted(mrna_def, key=lambda x:x['start'])
-			for exon_def in sorted_mrna_def:
+			sorted_mrna_start_def=sorted(mrna_def, key=lambda x:x['start'])
+			sorted_mrna_stop_def=sorted(mrna_def, key=lambda x:x['stop'])
+			for exon_def in sorted_mrna_start_def:
 				#print "exon_def"
 				#pp.pprint(exon_def)
 				#print mrna_def[0]['start']
