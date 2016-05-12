@@ -257,7 +257,7 @@ def write_gene_def_to_bed12(gene_def_dict):
 			block_sizes_str=','.join(block_sizes)
 			block_starts_str=','.join(block_starts)
 			# format thickStart and thickEnd columns 7 and 8 and blocks
-			mrna_ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, str(block_count), block_starts_str, block_sizes_str])
+			mrna_ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, str(block_count), block_sizes_str, block_starts_str])
 			mrna_ouputs.append(mrna_ouput)
 	return '\n'.join(mrna_ouputs) 
 
