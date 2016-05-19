@@ -52,30 +52,46 @@ for line in file_read: # 1 gene per line
 	elif status=='Partial':
 		score=500
 	elif status=='Full':
-	    score = 1000
+		score = 1000
 
 	s=p.search(gene_name)
-	cds_def = {} # make empty array to store exon strand, start, and stop info
+	cds_def = {} 
+	cds_array=[]# make empty array to store exon strand, start, and stop info
 	# neccessary when more than one exon or CDS region exists for a gene
-	if not s:
+	if not s: # if no exons
 		print 'No search hit'
-		gene_dict[gene_name]={'gene_name':gene_name, 'start': start_loc, 'stop': stop_loc, 'score': score}
+		gene_dict[gene_name]={'gene_name':gene_name, 'start': start_loc, 'stop': stop_loc, 'score': score, 'CDS': [] }
 		gene_def_dict=gene_dict[gene_name]
-	else:
+
+	else: # if exons present
 		print 'search found. Span=', s.span(), ' Group=', s.group()
 		gene_exon_name=str(s.group())
 		gene_name_str_list = gene_exon_name.split("_")
 		gene_name=gene_name_str_list[0]
+		if gene_name in gene_dict:
+			# fetch existing gene record from dictionary
+			gene_def_dict = gene_dict[gene_name]
+		else:
+			# create gene in dictionary
+			gene_dict[gene_name]=gene_def_dict
+		# extract and create exon_def
 		exon_num= gene_name_str_list[1]
-		loc_def= {'strand':strand, 'start': start_loc, 'stop': stop_loc, 'score': score}
-		cds_def[exon_num]=loc_def
-		#cds_array.append(cds_def)
+		exon_def= {'exon_num': exon_num, 'strand':strand, 'start': start_loc, 'stop': stop_loc}
+		cds_def[exon_num]=exon_def
+		#cds_array.append(exon_def)
 		#print cds_array
-		gene_def_dict['CDS']= cds_def
+		gene_def_dict['CDS'].append(exon_def)
 		gene_dict[gene_name]=gene_def_dict
+'''
+for key in gene_dict:
 
 
-
+def format_bed12_line(gene_def_dict):
+item_rgb='0,0,0'
+    # columns 7-8 thickStart and thickStop
+    cds_def=gene_def_dict['CDS']
+    cds_exon_count= len(cds_def)
+'''
 pp.pprint(gene_dict)
 
 
