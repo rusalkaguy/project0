@@ -1,7 +1,0 @@
-#index	gene_name	exon_name	exon_start	exon_stop
-1	A	qwe	22	3
-2	B	wse	1	4
-3	C	wer	3	5
-4	D	qqa	6	7
-5	B	asd	8	9
-6	Z	xcv	9	10

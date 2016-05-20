@@ -154,6 +154,8 @@ def format_bed12_line(gene_def_dict):
         if mrna_count>0:
             virtual_mrna_list = gene_def_dict['mRNA']
         for mrna_def in virtual_mrna_list:
+            #print('----------mRNA_def-----------------')
+            #pp.pprint(mrna_def)
             block_count = len(mrna_def) # number of blocks for each mRNA
             # only apply the CDS to the mRNA's that completely contain it.
             # Does the CDS start and stop fall within the mRNA start and stop?
