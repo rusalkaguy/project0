@@ -128,22 +128,22 @@ def write_gene_def_to_bed12(gene_def_dict):
 		max_stop_cds_pos=sorted(cds_def, key=lambda x:x['stop'])[-1]['stop']
 		chrom_start = min_start_cds_pos
 		chrom_stop = min_start_cds_pos
+		# sort cds_def by start and end values and choose min start and max end
+		thick_start = min_start_cds_pos
+		thick_stop = max_stop_cds_pos
+		thick_start_str=str(thick_start)
+		thick_stop_str=str(thick_stop)
 		for exon_def in cds_def:
-			# sort cds_def by start and end values and choose min start and max end
-			thick_start = min_start_cds_pos
-			thick_stop = max_stop_cds_pos
-			thick_start_str=str(thick_start)
-			thick_stop_str=str(thick_stop)
 			block_start= str(int(exon_def['start'])-int(chrom_start))              
 			block_starts.append(block_start)
 			block_size= str(int(exon_def['stop'])-int(exon_def['start']))
 			block_sizes.append(block_size)
-			block_sizes_str=','.join(block_sizes)
-			block_starts_str=','.join(block_starts)
+		block_sizes_str=','.join(block_sizes)
+		block_starts_str=','.join(block_starts)
 
-			# format thickStart and thickEnd columns 7 and 8 and blocks
-			ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, block_count, block_sizes_str, block_starts_str])
-			ouputs.append(ouput)
+		# format thickStart and thickEnd columns 7 and 8 and blocks
+		ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, block_count, block_sizes_str, block_starts_str])
+		ouputs.append(ouput)
 	else: 
 		block_count='1'
 		block_size=0
