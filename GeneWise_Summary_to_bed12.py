@@ -142,7 +142,7 @@ def write_gene_def_to_bed12(gene_def_dict):
 		block_starts_str=','.join(block_starts)
 
 		# format thickStart and thickEnd columns 7 and 8 and blocks
-		ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, block_count, block_sizes_str, block_starts_str])
+		ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, block_count, block_starts_str , block_sizes_str])
 		ouputs.append(ouput)
 	else: 
 		block_count='1'
@@ -154,7 +154,7 @@ def write_gene_def_to_bed12(gene_def_dict):
 		thick_stop= chrom_stop
 		thick_start_str=str(thick_start)
 		thick_stop_str=str(thick_stop)
-		ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, block_count, block_sizes_str, block_starts_str])
+		ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, block_count, block_starts_str, block_sizes_str])
 		ouputs.append(ouput)
 	return'\n'.join(ouputs)
 
