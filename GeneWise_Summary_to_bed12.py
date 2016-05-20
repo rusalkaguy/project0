@@ -100,15 +100,63 @@ So, construct a single .bed file line from each set of GENE + GENE_ex*.
 chrom='NC_006273'
 
 def write_gene_def_to_bed12(gene_def_dict):
-	print '---------gene_def_dict-----------------'
-	pp.pprint( gene_def_dict)
+	rgb='0,0,0'
+	#print '---------gene_def_dict-----------------'
+	#pp.pprint( gene_def_dict)
 	# Columns 7-8: thickStart and thickStop of bed format
-	cds_def=gene_def_dict['CDS']
+	cds_def=gene_def_dict['CDS']# list of CDS, where CDS is a list of exon_def's
+	#print cds_def
 	cds_exon_count= len(cds_def)
+	# Helpful variables
+	chrom_start=gene_def_dict['start']
+	chrom_stop=gene_def_dict['stop']
+	gene_name=gene_def_dict['gene_name']
+	score=gene_def_dict['score']
+	strand=gene_def_dict['strand']
 	# Format first 6 lines 
-	bed6_str=chrom+'\t'+str(gene_def_dict['start'])+'\t'+str(gene_def_dict['stop'])\
-		+'\t'+ str(gene_def_dict['gene_name'])+'\t'+str(gene_def_dict['score'])+'\t'+str(gene_def_dict['strand'])
-	print 'bed6_str = '+ bed6_str
+	bed6_str=chrom+'\t'+str(chrom_start)+'\t'+str(chrom_stop)\
+		+'\t'+ str(gene_name)+'\t'+str(score)+'\t'+str(strand)
+	ouputs=[]
+	block_count= str(cds_exon_count)
+	if cds_exon_count>0:
+		# compute blockCount    blockSizes  blockStarts
+		mrna_ouput=[]
+		mrna_ouputs=[]
+		block_sizes=[] # initialize array of integer sizes
+		block_starts=[] # initialize array of integer starts
+		min_start_cds_pos=sorted(cds_def, key=lambda x:x['start'])[0]['start']
+		max_stop_cds_pos=sorted(cds_def, key=lambda x:x['stop'])[-1]['stop']
+		chrom_start = min_start_cds_pos
+		chrom_stop = min_start_cds_pos
+		for exon_def in cds_def:
+			# sort cds_def by start and end values and choose min start and max end
+			thick_start = min_start_cds_pos
+			thick_stop = max_stop_cds_pos
+			thick_start_str=str(thick_start)
+			thick_stop_str=str(thick_stop)
+			block_start= str(int(exon_def['start'])-int(chrom_start))              
+			block_starts.append(block_start)
+			block_size= str(int(exon_def['stop'])-int(exon_def['start']))
+			block_sizes.append(block_size)
+			block_sizes_str=','.join(block_sizes)
+			block_starts_str=','.join(block_starts)
+
+			# format thickStart and thickEnd columns 7 and 8 and blocks
+			ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, block_count, block_sizes_str, block_starts_str])
+			ouputs.append(ouput)
+	else: 
+		block_count='1'
+		block_size=0
+		block_start=chrom_start
+		block_sizes_str=str(block_size)
+		block_starts_str= str(block_start) 
+		thick_start= chrom_start
+		thick_stop= chrom_stop
+		thick_start_str=str(thick_start)
+		thick_stop_str=str(thick_stop)
+		ouput='\t'.join([bed6_str, thick_start_str, thick_stop_str, rgb, block_count, block_sizes_str, block_starts_str])
+		ouputs.append(ouput)
+	return'\n'.join(ouputs)
 
 def write_bed_12_line_to_bed_file(gene_dict):
 
@@ -117,7 +165,7 @@ def write_bed_12_line_to_bed_file(gene_dict):
 
 	for gene_name in gene_dict:
 		gene_def_dict = gene_dict[gene_name]
-		print '-----------------write_gene_def_to_bed12(gene_def_dict)------------------'
+		#print '-----------------write_gene_def_to_bed12(gene_def_dict)------------------'
 		print write_gene_def_to_bed12(gene_def_dict)
 		genewise_bed_file.write(write_gene_def_to_bed12(gene_def_dict)+'\n')
 	# Close the newly written bed file
