@@ -290,5 +290,5 @@ for line in file_read:
 	file_open.write(line)
 
 file_open.close()
-# Run with $ python genbank_to_bed.py NC_006273.2
-# To add additional genome, run with $ python genbank_to_bed.py KP745636.1
+# Run with $ python genbank_to_bed12.py NC_006273.2
+# To add additional genome, run with $ python genbank_to_bed12.py KP745636.1
