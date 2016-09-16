@@ -26,15 +26,14 @@ handle.close()
 local_file.close()
 
 # run with $ python Genomes_from_Genbank.py NC_006273
-
 '''
 Create a dictionary of gene names as keys
-'''
+
 gene_index = 0
 gene_type_col = 1
 gene_name_col = 5
 # Open (fo = "file open") the bed file previously created.
-file_open = open ("NC_006273.2.gbk", "r+")
+file_open = open (file_name, "r+")
 
 # Create a new dictionary og gene names
 gene_dict ={} # Key is the gene name 
@@ -52,4 +51,4 @@ for line in file_open:
 
 # Close opened file
 file_open.close
-
+'''
