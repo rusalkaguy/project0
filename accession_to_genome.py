@@ -137,9 +137,29 @@ def accession_to_genome(path_str):
 
 # 5. Automate conversion from bed file to bigbed file on cheaha
 # 	a. Create chrom.sizes file
-#def mk_chrom_sizes_file():
-# 		1. If known database, $ fetchChromSizes <db> > <db>.chrom.sizes
-# 		2. If new database, determine the number of nucleotides in the chromosomes
+def mk_chrom_sizes_file():
+	# 1. If known database, $ fetchChromSizes <db> > <db>.chrom.sizes
+	# 2. If new database, determine the number of nucleotides in the chromosomes
+	filename = "hh5Merlin2.chrom.sizes"
+	file_contents = "NC_006273v2	235646"
+	chrom_sizes_file = open(filename,'w')
+	chrom_sizes_file.write(file_contents)
+	chrom_sizes_file.close
+
+	# Save file to subdir
+	subdir = path_str
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided."
+	'''
+	cmd = ["fetchChromSizes", accession_number]
+	print 'calling: ' + " ".join(cmd)
+	call(cmd)
+	print 'accession_to_genome function running for ' + accession_number
+	'''
 # 	b. Sort the bed file: $ sort -k1,1 -k2,2n unsorted.bed > sorted.bed
 def sort_bed_file(path_str):
 	old_filename = path_str+'.bed'
@@ -163,7 +183,13 @@ def sort_bed_file(path_str):
 # 		1. $ module load ngs-ccts/ucsc_kent/2014-03-05
 # 		2. $ bedToBigBed in.bed hg19.chrom.sizes out.bb
 # 	d. Save bigbed file in directory
-
+def bedToBigBed(path_str):
+	sorted_bed_file = path_str+'sorted.bed'
+	output_filename = path_str+'.bb'
+	from subprocess import call
+	cmd = ["bedToBigBed",sorted_bed_file,"hg19.chrom.sizes", output_filename]
+	print 'calling: ' + " ".join(cmd)
+	call(cmd)
 # 6. Create the hub.txt file and save in directory on server
 def mk_hub_txt_file(path_str):
 	hub_name = 'hub.txt'
