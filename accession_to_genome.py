@@ -174,7 +174,7 @@ def sort_bed_file(path_str):
 	filename = new_filename
 	dest_filepath = os.path.join(subdir, filename)
 	try:
-		shutil.move(filename,dest_filepath)
+		shutil.copyfile(filename,dest_filepath)
 		print filename+" moved to subdirectory "+ subdir
 	except IOError:
 		print "Wrong path provided because the bed file does not exist."
