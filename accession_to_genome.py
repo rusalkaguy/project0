@@ -262,6 +262,8 @@ if __name__ == '__main__':
 	accession_to_genome(accession_number)
 	mkdir_p(path_str)
 	sort_bed_file(path_str)
+	mk_chrom_sizes_file()
+	bedToBigBed(path_str)
 	mk_hub_txt_file(path_str)
 	mk_descriptionUrl_file(path_str)
 	mk_genomes_file(path_str)
