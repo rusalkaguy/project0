@@ -187,7 +187,7 @@ def bedToBigBed(path_str):
 	sorted_bed_file = path_str+'sorted.bed'
 	output_filename = path_str+'.bb'
 	from subprocess import call
-	cmd = ["bedToBigBed",sorted_bed_file,"hg19.chrom.sizes", output_filename]
+	cmd = ["bedToBigBed",sorted_bed_file,"hh5Merlin2.chrom.sizes", output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 # 6. Create the hub.txt file and save in directory on server
