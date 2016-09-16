@@ -267,7 +267,27 @@ if __name__ == '__main__':
 	mk_hub_txt_file(path_str)
 	mk_descriptionUrl_file(path_str)
 	mk_genomes_file(path_str)
-
-
-
+'''
+8. Create the trackDb.txt files
+	a. Minimum Requirements: 
+		track track_name
+		bigDataUrl track_data_URL
+		shortLabel short_label
+		longLabel long_label
+		type track_type
+	b. Track: symbolic name of track 
+		must be unique
+		must be the first entry in the trackDb.txt file
+	c. BigDataUrl: the file name, path, or Web location of the track's data file
+		Can be URL
+		path relative to the trackDb.txt file is preferable because changes to the server name 
+		won’t affect relative path, but will render the URL ineffective
+	d. shortLabel: short name for track appears in left column of the genome browswer
+		Max length 17
+	e. longLabel
+	“type bigBed #” where # is the number of features or columns in the bed file
+9. Create track description files for each track and save in subdirectory
+	Purpose: provide information about research to build credibility of data 
+	and help people decide whether or not to use data
+'''
 # $ python accession_to_genome.py NC_006273.2
