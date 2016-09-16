@@ -63,8 +63,12 @@ import os
 import shutil
 
 accession_number = argv[1] # Upacks argv-> assigned to 1 variable you can work with
-
-path_str = str(accession_number)
+# if accession number has a period, indicating version number, replace with v.
+if '.' in accession_number:
+	path_str='v'.join(accession_number.split('.'))
+else:
+	path_str = str(accession_number)
+#print path_str
 
 def mkdir_p(path_str):
 	try:
@@ -76,11 +80,11 @@ def mkdir_p(path_str):
 			raise
 	print "New directory, "+path_str+", created in the current directory."
 	subdir = path_str
-	filename = "NC_006273v2.bed"
+	filename = path_str+".bed"
 	dest_filepath = os.path.join(subdir, filename)
 	try:
-		shutil.copyfile(filename,dest_filepath)
-		print filename+" copied to subdirectory "+ subdir
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
 	except IOError:
 		print "Wrong path provided."
 
@@ -95,7 +99,7 @@ def change_dir(path_str):
 
 # Run the genbank_to_bed12.py script
 #import genbank_to_bed12
-def accession_to_genome(accession_number):
+def accession_to_genome(path_str):
 	from subprocess import call
 	cmd = ["python","genbank_to_bed12.py", accession_number]
 	print 'calling: ' + ".".join(cmd)
@@ -119,7 +123,7 @@ def accession_to_genome(accession_number):
 # 	genomesFile genomes_filelist
 # 	email email_address
 # 	descriptionUrl descriptionUrl
-def mk_hub_txt_file(accession_number):
+def mk_hub_txt_file(path_str):
 	hub_name = 'hub.txt'
 	hub_short_label= 'Viruses-HH5(HCMV)'
 	hub_long_label= 'Track hub for HCMV strain from RefSeq and GenBank'
@@ -137,23 +141,37 @@ def mk_hub_txt_file(accession_number):
 	filename = hub_name
 	hub_file_open = open(filename,'w')
 	hub_file_contents = '\n'.join([line1,line2,line3,line4,line5,line6])
-	print hub_file_contents
+	#print hub_file_contents
 	for line in hub_list_of_lines:
 		hub_file_open.writelines(line+'\n')
 	hub_file_open.close()
 
+	# Save file to subdir
+	subdir = path_str
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided."
 
-#def mk_descriptionUrl_file():
-	'''
-	<html>
-	<body>
-	<h1>hello world</h1>
-	This is HCMV (HH5) strain Merlin and strain BE/7/2011, for starters.
+def mk_descriptionUrl_file(path_str):
+	filename = 'description.html'
+	description_str = """<html>\n<body>\n<h1>hello world</h1>\nThis is HCMV (HH5) strain Merlin and strain BE/7/2011, for starters.\n\nSupport contact: hh5trackhub@vo.uabgrid.uab.edu\n</body>\n</html>"""
+	#print description_str
+	description_file = open(filename,'w')
+	description_file.write(description_str)
+	description_file.close
 
-	Support contact: hh5trackhub@vo.uabgrid.uab.edu 
-	</body>
-	</html>
-	'''
+	# Save file to subdir
+	subdir = path_str
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided."
+
 #def mk_genomes_file():
 	'''
 	genome hh5Merlin2
@@ -169,5 +187,6 @@ def mk_hub_txt_file(accession_number):
 	'''
 if __name__ == '__main__':
 	accession_to_genome(accession_number)
-	mkdir_p(accession_number)
-	mk_hub_txt_file(accession_number)
+	mkdir_p(path_str)
+	mk_hub_txt_file(path_str)
+	mk_descriptionUrl_file(path_str)

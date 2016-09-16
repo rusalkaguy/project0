@@ -7,13 +7,12 @@ from sys import argv
 
 # Defining Accession Number, File_name, and Database
 accession_number = argv[1] # Upacks argv-> assigned to 1 variable you can work with
-file_name = accession_number + '.gbk'
 ucsc_chrom='v'.join(accession_number.split('.'))
 db = 'nucleotide' 
 debug_parsing = 0
 
 # Write Genbank File to BED file format: https://gist.github.com/brantfaircloth/893580
-from Bio import SeqIO
+
 from Bio.SeqFeature import SeqFeature, FeatureLocation, CompoundLocation
 import pdb
 
@@ -72,7 +71,9 @@ def loc_dict_to_exon_array(feature):
 def genbank_to_dictionary():
 	# add chrom name using split and join('v')
 	ucsc_chrom='v'.join(accession_number.split('.'))
-
+	from Bio import SeqIO
+	file_name = accession_number + '.gbk'
+	debug_parsing = 0
 	# process features  within genome
 	for record in SeqIO.parse(open(file_name, "rU"), "genbank") : #record is genome
 		# get accession_number from record
@@ -138,7 +139,8 @@ def genbank_to_dictionary():
 				elif feature.type == 'mRNA':
 					# Add key-value pair {feature_type:loc_array} to gene_def dictionary
 					# Check to see if 'mRNA' is already a key in the dictionary
-					print "mRNA: append to mRNA array"
+					if debug_parsing>1: 
+						print "mRNA: append to mRNA array"
 					gene_def_dict['mRNA'].append(loc_array)
 
 				if debug_parsing>1: 
@@ -165,7 +167,7 @@ rgb='0,0,0'
 # change gene_def_dict to gene_dict[key]
 def write_gene_def_to_bed12(gene_def_dict):
 	
-	pp.pprint(gene_def_dict)
+	#pp.pprint(gene_def_dict)
 	# column 9:itemRgb
 	score=1000
 	item_rgb='0,0,0'
@@ -190,11 +192,11 @@ def write_gene_def_to_bed12(gene_def_dict):
 
 		#print('----------cds_def------------------')
 		#pp.pprint(cds_def)
-		print 'mrna_count='+str(mrna_count)
+		#print 'mrna_count='+str(mrna_count)
 		# when no mRNA is present (mrna_count=0), cds defines block size and start
 		if mrna_count>0:
 			virtual_mrna_list = gene_def_dict['mRNA']
-			pp.pprint ('virtual_mrna_list='+ str(virtual_mrna_list))
+			#pp.pprint ('virtual_mrna_list='+ str(virtual_mrna_list))
 		for mrna_def in virtual_mrna_list:
 			# sort cds_def by start and end values and choose min start and max end
 			min_start_mrna_pos=sorted(mrna_def, key=lambda x:x['start'])[0]['start']
@@ -264,31 +266,34 @@ def write_gene_def_to_bed12(gene_def_dict):
 def write_bed_12_line_to_bed_file(gene_dict):
 
 	# Write the formatted information to a new bed file.
-	bed_file= open('bed_file.bed','w') 
+	bed_file_name = str(ucsc_chrom)+'.bed'
+	bed_file= open(bed_file_name,'w') 
 	# 'a' creates new file if it does not exist and does not truncate the file if it does exist
 	# 'w' creates the file if the file does not exist, but it will truncate the existing file
 	#print(gene_dict.keys())
 	for gene_name in gene_dict:
 		#print ('------gene_name=',gene_name,'--------')
 		gene_def_dict = gene_dict[gene_name]
-		print write_gene_def_to_bed12(gene_def_dict)  # pass definition for a gene to sub routine.
+		#print write_gene_def_to_bed12(gene_def_dict)  # pass definition for a gene to sub routine.
 		bed_file.write(write_gene_def_to_bed12(gene_def_dict)+'\n')
 
 	# Close the newly written bed file
 	bed_file.close
+	# Remove empty lines
+	file_open = open (bed_file_name, "r+")
+	file_read = file_open.readlines()
+	file_open.close()
+	file_open = open (bed_file_name, "w")
+	for line in file_read:
+		if len(line.strip())!=0:
+			file_open.write(line)
+		else:
+			continue
+	file_open.close()
 
 if __name__ == '__main__':
 	write_bed_12_line_to_bed_file(genbank_to_dictionary())
 
-file_open = open ("bed_file.bed", "r+")
-file_read = file_open.readlines()
-file_open.close()
-file_open = open ("bed_file.bed", "w")
-for line in file_read:
-	if len(line.strip())==0:
-		continue
-	file_open.write(line)
 
-file_open.close()
 # Run with $ python genbank_to_bed12.py NC_006273.2
 # To add additional genome, run with $ python genbank_to_bed12.py KP745636.1
