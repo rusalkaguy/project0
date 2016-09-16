@@ -88,7 +88,7 @@ def genbank_file(accession_number):
 	cmd = ["python","Genomes_from_Genbank.py", accession_number]
 	print 'calling: ' + ".".join(cmd)
 	call(cmd)
-	print 'accession_to_genome function running for ' + accession_number
+	#print 'genbank_file function running for ' + accession_number
 
 
 # if accession number has a period, indicating version number, replace with v.
@@ -111,7 +111,7 @@ def mkdir_p(path_str):
 	filename = path_str+".bed"
 	dest_filepath = os.path.join(subdir, filename)
 	try:
-		shutil.move(filename,dest_filepath)
+		shutil.copyfile(filename,dest_filepath)
 		print filename+" moved to subdirectory "+ subdir
 	except IOError:
 		print "Wrong path provided because the bed file does not exist."
@@ -130,27 +130,40 @@ def change_dir(path_str):
 def accession_to_genome(path_str):
 	from subprocess import call
 	cmd = ["python","genbank_to_bed12.py", accession_number]
-	print 'calling: ' + ".".join(cmd)
+	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 	print 'accession_to_genome function running for ' + accession_number
 
 # 5. Automate conversion from bed file to bigbed file on cheaha
 # 	a. Create chrom.sizes file
+#def mk_chrom_sizes_file():
 # 		1. If known database, $ fetchChromSizes <db> > <db>.chrom.sizes
 # 		2. If new database, determine the number of nucleotides in the chromosomes
 # 	b. Sort the bed file: $ sort -k1,1 -k2,2n unsorted.bed > sorted.bed
+def sort_bed_file(path_str):
+	old_filename = path_str+'.bed'
+	new_filename = path_str+'sorted.bed'
+	from subprocess import call
+	cmd = ["sort","-k1,1","-k2,2n", old_filename,'-o', new_filename]
+	print 'calling: ' + " ".join(cmd)
+	call(cmd)
+	#print 'sort_bed_file function running for ' + accession_number
+	# move sorted file to subdir
+	subdir = path_str
+	filename = new_filename
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided because the bed file does not exist."
+
 # 	c. Convert bed to bigbed
 # 		1. $ module load ngs-ccts/ucsc_kent/2014-03-05
 # 		2. $ bedToBigBed in.bed hg19.chrom.sizes out.bb
 # 	d. Save bigbed file in directory
 
 # 6. Create the hub.txt file and save in directory on server
-# 	hub hub_name 
-# 	shortLabel hub_short_label
-# 	longLabel hub_long_label
-# 	genomesFile genomes_filelist
-# 	email email_address
-# 	descriptionUrl descriptionUrl
 def mk_hub_txt_file(path_str):
 	hub_name = 'hub.txt'
 	hub_short_label= 'Viruses-HH5(HCMV)'
@@ -200,24 +213,32 @@ def mk_descriptionUrl_file(path_str):
 	except IOError:
 		print "Wrong path provided."
 
-#def mk_genomes_file():
-	'''
-	genome hh5Merlin2
-	trackDb hh5Merlin2/trackDb.txt
-	twoBitPath hh5Merlin2/NC_006273v2.2bit
-	groups hh5Merlin2/groups.txt
-	description NC_006273v2
-	organism HH5 strain Merlin
-	defaultPos NC_006273v2:1-235646
-	orderKey 100
-	scientificName Human herpesvirus 5
-	htmlPath description.html
-	'''
+def mk_genomes_file(path_str):
+	filename = 'genomes.txt'
+	genomes_str = '''genome hh5Merlin2\ntrackDb hh5Merlin2/trackDb.txt\ntwoBitPath hh5Merlin2/NC_006273v2.2bit\ngroups hh5Merlin2/groups.txt\ndescription NC_006273v2\norganism HH5 strain Merlin\ndefaultPos NC_006273v2:1-235646\norderKey 100\nscientificName Human herpesvirus 5\nhtmlPath description.html'''
+	#print description_str
+	genomes_file = open(filename,'w')
+	genomes_file.write(genomes_str)
+	genomes_file.close
+
+	# Save file to subdir
+	subdir = path_str
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided."
+
 if __name__ == '__main__':
 	genbank_file(accession_number)
 	accession_to_genome(accession_number)
 	mkdir_p(path_str)
+	sort_bed_file(path_str)
 	mk_hub_txt_file(path_str)
 	mk_descriptionUrl_file(path_str)
+	mk_genomes_file(path_str)
+
+
 
 # $ python accession_to_genome.py NC_006273.2
