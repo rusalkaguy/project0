@@ -63,6 +63,34 @@ import os
 import shutil
 
 accession_number = argv[1] # Upacks argv-> assigned to 1 variable you can work with
+
+# Get Genbank file
+def genbank_file(accession_number):
+	'''
+	file_name = accession_number + '.gbk'
+	db = 'nucleotide'
+
+	# Grabbing genomes from Genbank
+	from Bio import Entrez
+
+	# Entrez sends an email reqesting the data specified below
+	Entrez.email = 'bheater@uab.edu'
+	handle=Entrez.efetch(db=db,id=accession_number,rettype='gb') 
+	# Accession id works, returns genbank format, looks in the 'nucleotide' database
+
+	# Store locally
+	local_file=open(file_name,'w') # opens and create file (W)
+	local_file.write(handle.read()) # write takes data and writes to file
+	handle.close()
+	local_file.close()
+	'''
+	from subprocess import call
+	cmd = ["python","Genomes_from_Genbank.py", accession_number]
+	print 'calling: ' + ".".join(cmd)
+	call(cmd)
+	print 'accession_to_genome function running for ' + accession_number
+
+
 # if accession number has a period, indicating version number, replace with v.
 if '.' in accession_number:
 	path_str='v'.join(accession_number.split('.'))
@@ -86,7 +114,7 @@ def mkdir_p(path_str):
 		shutil.move(filename,dest_filepath)
 		print filename+" moved to subdirectory "+ subdir
 	except IOError:
-		print "Wrong path provided."
+		print "Wrong path provided because the bed file does not exist."
 
 def change_dir(path_str):
 	try:
@@ -186,7 +214,10 @@ def mk_descriptionUrl_file(path_str):
 	htmlPath description.html
 	'''
 if __name__ == '__main__':
+	genbank_file(accession_number)
 	accession_to_genome(accession_number)
 	mkdir_p(path_str)
 	mk_hub_txt_file(path_str)
 	mk_descriptionUrl_file(path_str)
+
+# $ python accession_to_genome.py NC_006273.2
