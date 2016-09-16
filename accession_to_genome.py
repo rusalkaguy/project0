@@ -150,7 +150,7 @@ def mk_chrom_sizes_file():
 	subdir = path_str
 	dest_filepath = os.path.join(subdir, filename)
 	try:
-		shutil.move(filename,dest_filepath)
+		shutil.copyfile(filename,dest_filepath)
 		print filename+" moved to subdirectory "+ subdir
 	except IOError:
 		print "Wrong path provided."
