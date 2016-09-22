@@ -54,6 +54,8 @@ This script should
 		Purpose: provide information about research to build credibility of data 
 		and help people decide whether or not to use data
 '''
+
+
 # Create directory, named by accession #, to place relevant files
 
 # Use argv to obtain input of accession # from command line
@@ -184,9 +186,18 @@ def sort_bed_file(path_str):
 # 		2. $ bedToBigBed in.bed hg19.chrom.sizes out.bb
 # 	d. Save bigbed file in directory
 def bedToBigBed(path_str):
+	from subprocess import call
+	# load biopython 
+	# 	$ module load ngs-ccts/miniconda/2-latest
+	# 	$ source activate py27_biopython
+
+	# load bedToBigBed
+	# 	$ module load ngs-ccts/ucsc_kent/2014-03-05
+	load_bedToBigBed = ["module", "load", "ngs-ccts/ucsc_kent/2014-03-05"]
+	call(load_bedToBigBed)
+	print 'calling: ' + " ".join(load_bedToBigBed)
 	sorted_bed_file = path_str+'sorted.bed'
 	output_filename = path_str+'.bb'
-	from subprocess import call
 	cmd = ["bedToBigBed",sorted_bed_file,"hh5Merlin2.chrom.sizes", output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
