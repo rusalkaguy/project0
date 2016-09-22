@@ -187,15 +187,6 @@ def sort_bed_file(path_str):
 # 	d. Save bigbed file in directory
 def bedToBigBed(path_str):
 	from subprocess import call
-	# load biopython 
-	# 	$ module load ngs-ccts/miniconda/2-latest
-	# 	$ source activate py27_biopython
-
-	# load bedToBigBed
-	# 	$ module load ngs-ccts/ucsc_kent/2014-03-05
-	load_bedToBigBed = ["module", "load", "ngs-ccts/ucsc_kent/2014-03-05"]
-	call(load_bedToBigBed)
-	print 'calling: ' + " ".join(load_bedToBigBed)
 	sorted_bed_file = path_str+'sorted.bed'
 	output_filename = path_str+'.bb'
 	cmd = ["bedToBigBed",sorted_bed_file,"hh5Merlin2.chrom.sizes", output_filename]
