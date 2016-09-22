@@ -102,7 +102,7 @@ else:
 def mkdir_p(path_str):
 	try:
 		os.makedirs(path_str)
-	except OSError as exc:  # Python >2.5
+	except WindowsError as exc:# Python >2.5
 		if exc.errno == errno.EEXIST and os.path.isdir(path_str):
 			pass
 		else:
