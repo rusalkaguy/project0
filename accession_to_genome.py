@@ -283,7 +283,7 @@ def mk_genomes_file(path_str):
 '''
 def mktrackDb_file(path_str):
 	filename = "trackDb.txt"
-	trackDb_str = "track hh5Merlin2_refseq_mrna\nbigDataUrl NC_006273v2.mrna.bb\nshortLabel RefSeq Transcripts\nlongLabel RefSeq transcripts(mRNA)\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\n\naltColor 230,170,40\ntype bigBed 12\ngroup genes\n\ntrack hh5Merlin2_refseq_loci\nbigDataUrl NC_006273v2_refseq_loci.bb\nshortLabel RefSeq loci\nlongLabel RefSeq loci\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 6\nsearchIndex name\ngroup genes"
+	trackDb_str = "track hh5Merlin2_refseq_mrna\nbigDataUrl NC_006273v2.mrna.bb\nshortLabel RefSeq Transcripts\nlongLabel RefSeq transcripts(mRNA)\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 12\ngroup genes\n\ntrack hh5Merlin2_refseq_loci\nbigDataUrl NC_006273v2_refseq_loci.bb\nshortLabel RefSeq loci\nlongLabel RefSeq loci\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 6\nsearchIndex name\ngroup genes"
 	trackDb_file = open(filename,'w')
 	trackDb_file.write(trackDb_str)
 	trackDb_file.close
@@ -308,4 +308,12 @@ if __name__ == '__main__':
 	mk_descriptionUrl_file(path_str)
 	mk_genomes_file(path_str)
 	mktrackDb_file(path_str)
+
+# in project 0 folder on cheaha
+# load biopython 
+# 	$ module load ngs-ccts/miniconda/2-latest
+# 	$ source activate py27_biopython
+# load bedToBigBed
+# 	$ module load ngs-ccts/ucsc_kent/2014-03-05
+# run program with
 # $ python accession_to_genome.py NC_006273.2
