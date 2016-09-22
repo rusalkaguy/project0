@@ -190,6 +190,7 @@ def bedToBigBed(path_str):
 	cmd = ["bedToBigBed",sorted_bed_file,"hh5Merlin2.chrom.sizes", output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
+
 # 6. Create the hub.txt file and save in directory on server
 def mk_hub_txt_file(path_str):
 	hub_name = 'hub.txt'
@@ -257,16 +258,6 @@ def mk_genomes_file(path_str):
 	except IOError:
 		print "Wrong path provided."
 
-if __name__ == '__main__':
-	genbank_file(accession_number)
-	accession_to_genome(accession_number)
-	mkdir_p(path_str)
-	sort_bed_file(path_str)
-	mk_chrom_sizes_file()
-	bedToBigBed(path_str)
-	mk_hub_txt_file(path_str)
-	mk_descriptionUrl_file(path_str)
-	mk_genomes_file(path_str)
 '''
 8. Create the trackDb.txt files
 	a. Minimum Requirements: 
@@ -290,4 +281,31 @@ if __name__ == '__main__':
 	Purpose: provide information about research to build credibility of data 
 	and help people decide whether or not to use data
 '''
+def mktrackDb_file(path_str):
+	filename = "trackDb.txt"
+	trackDb_str = "track hh5Merlin2_refseq_mrna\nbigDataUrl NC_006273v2.mrna.bb\nshortLabel RefSeq Transcripts\nlongLabel RefSeq transcripts(mRNA)\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\n\naltColor 230,170,40\ntype bigBed 12\ngroup genes\n\ntrack hh5Merlin2_refseq_loci\nbigDataUrl NC_006273v2_refseq_loci.bb\nshortLabel RefSeq loci\nlongLabel RefSeq loci\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 6\nsearchIndex name\ngroup genes"
+	trackDb_file = open(filename,'w')
+	trackDb_file.write(trackDb_str)
+	trackDb_file.close
+
+	# Save file to subdir
+	subdir = path_str
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided."
+
+if __name__ == '__main__':
+	genbank_file(accession_number)
+	accession_to_genome(accession_number)
+	mkdir_p(path_str)
+	sort_bed_file(path_str)
+	mk_chrom_sizes_file()
+	bedToBigBed(path_str)
+	mk_hub_txt_file(path_str)
+	mk_descriptionUrl_file(path_str)
+	mk_genomes_file(path_str)
+	mktrackDb_file(path_str)
 # $ python accession_to_genome.py NC_006273.2
