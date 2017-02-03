@@ -139,24 +139,27 @@ def accession_to_genome(path_str):
 
 # 5. Automate conversion from bed file to bigbed file on cheaha
 # 	a. Create chrom.sizes file
-def mk_chrom_sizes_file():
+def mk_chrom_sizes_file(path_str):
 	# 1. If known database, $ fetchChromSizes <db> > <db>.chrom.sizes
 	# 2. If new database, determine the number of nucleotides in the chromosomes
 	filename = "hh5Merlin2.chrom.sizes"
-	file_contents = "NC_006273v2	235646"
+	file_contents = path_str+"\t235646"
 	chrom_sizes_file = open(filename,'w')
-	chrom_sizes_file.write(file_contents)
+	chrom_sizes_file.write('NC_006273v2	235646')
 	chrom_sizes_file.close
-
-	# Save file to subdir
+	'''
+	# Save file to subdir	
 	subdir = path_str
 	dest_filepath = os.path.join(subdir, filename)
 	try:
-		shutil.copyfile(filename,dest_filepath)
+		shutil.move(filename,dest_filepath)
 		print filename+" moved to subdirectory "+ subdir
 	except IOError:
 		print "Wrong path provided."
 	'''
+	''' 
+	# To Fetch the Chrom Sizes When the Database Is Known: 
+	from subprocess import call
 	cmd = ["fetchChromSizes", accession_number]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
@@ -260,6 +263,23 @@ def mk_genomes_file(path_str):
 	except IOError:
 		print "Wrong path provided."
 
+def mk_groups_file(path_str):
+	filename = 'groups.txt'
+	groups_str = '''name gene\nlabel Genes and Gene Predictions\npriority 10\ndefaultIsClosed 1'''
+	#print description_str
+	groups_file = open(filename,'w')
+	groups_file.write(groups_str)
+	groups_file.close
+
+	# Save file to subdir
+	subdir = path_str
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided."
+
 '''
 8. Create the trackDb.txt files
 	a. Minimum Requirements: 
@@ -299,17 +319,49 @@ def mktrackDb_file(path_str):
 	except IOError:
 		print "Wrong path provided."
 
+def fasta_file(accession_number):
+	# if accession number has a period, indicating version number, replace with v.
+	if '.' in accession_number:
+		path_str='v'.join(accession_number.split('.'))
+	else:
+		path_str = str(accession_number)
+	file_name = path_str + '.fna'
+	fasta_file = open(file_name, 'w')
+	from Bio import SeqIO
+	fasta_contents = SeqIO.convert(accession_number+".gbk", "genbank", path_str+".fna", "fasta")
+	# add code here to edit first line of fasta file_content by changing accession_number to path_file
+	# parsing code
+	fasta_file.close
+	fasta_file=open(file_name,'r')
+	fasta_list =fasta_file.readlines()
+	print fasta_list[0]
+	words = fasta_list[0].split(' ')
+	if '.' in words[0]:
+		words[0]='<'+path_str
+		fasta_list[0]=' '.join(words)
+		fasta_text= ''.join(fasta_list)
+	else:
+		fasta_text=fasta_list
+	fasta_file.close
+	fasta_file = open(file_name, 'w')
+	fasta_file.write(fasta_text)
+	fasta_file.close
+
+
+
 if __name__ == '__main__':
 	genbank_file(accession_number)
 	accession_to_genome(accession_number)
 	mkdir_p(path_str)
 	sort_bed_file(path_str)
-	mk_chrom_sizes_file()
+	mk_chrom_sizes_file(path_str)
 	bedToBigBed(path_str)
 	mk_hub_txt_file(path_str)
 	mk_descriptionUrl_file(path_str)
 	mk_genomes_file(path_str)
+	mk_groups_file(path_str)
 	mktrackDb_file(path_str)
+	fasta_file(accession_number)
 
 # in project 0 folder on cheaha
 # load biopython 
