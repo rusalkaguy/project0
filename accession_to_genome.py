@@ -66,52 +66,28 @@ import os
 import shutil
 
 accession_number = argv[1] # Upacks argv-> assigned to 1 variable you can work with
-
-# Get Genbank file
-def genbank_file(accession_number):
-	'''
-	file_name = accession_number + '.gbk'
-	db = 'nucleotide'
-
-	# Grabbing genomes from Genbank
-	from Bio import Entrez
-
-	# Entrez sends an email reqesting the data specified below
-	Entrez.email = 'bheater@uab.edu'
-	handle=Entrez.efetch(db=db,id=accession_number,rettype='gb') 
-	# Accession id works, returns genbank format, looks in the 'nucleotide' database
-
-	# Store locally
-	local_file=open(file_name,'w') # opens and create file (W)
-	local_file.write(handle.read()) # write takes data and writes to file
-	handle.close()
-	local_file.close()
-	'''
-	from subprocess import call
-	cmd = ["python","Genomes_from_Genbank.py", accession_number]
-	print 'calling: ' + ".".join(cmd)
-	call(cmd)
-	#print 'genbank_file function running for ' + accession_number
-
+abrev = argv[2]
 
 # if accession number has a period, indicating version number, replace with v.
 if '.' in accession_number:
-	path_str='v'.join(accession_number.split('.'))
+	genome='v'.join(accession_number.split('.'))
 else:
-	path_str = str(accession_number)
-#print path_str
+	genome = str(accession_number)
+#print genome
 
-def mkdir_p(path_str):
+def mkdir_p(genome):
 	try:
-		os.makedirs(path_str)
+		os.makedirs(genome)
 	except OSError as exc:
-		if exc.errno == errno.EEXIST and os.path.isdir(path_str):
+		if exc.errno == errno.EEXIST and os.path.isdir(genome):
 			pass
 		else:
 			raise
-	print "New directory, "+path_str+", created in the current directory."
-	subdir = path_str
-	filename = path_str+".bed"
+	print "New directory, "+genome+", created in the current directory."
+	
+def move_file(genome):
+	subdir = genome
+	filename = genome+".bed"
 	dest_filepath = os.path.join(subdir, filename)
 	try:
 		shutil.copyfile(filename,dest_filepath)
@@ -119,18 +95,30 @@ def mkdir_p(path_str):
 	except IOError:
 		print "Wrong path provided because the bed file does not exist."
 
-def change_dir(path_str):
+
+# Get Genbank file
+def genbank_file(accession_number):
+	from subprocess import call
+	cmd = ["python","Genomes_from_Genbank.py", accession_number]
+	print 'calling: ' + ".".join(cmd)
+	call(cmd)
+	#print 'genbank_file function running for ' + accession_number
+
+
+
+
+def change_dir(genome):
 	try:
-		os.chdir(path_str)
+		os.chdir(genome)
 	except WindowsError as exc:  # Python >2.5
-		if exc.errno == errno.EEXIST and os.path.isdir(path_str):
+		if exc.errno == errno.EEXIST and os.path.isdir(genome):
 			pass
 		else:
 			raise
 
 # Run the genbank_to_bed12.py script
 #import genbank_to_bed12
-def accession_to_genome(path_str):
+def accession_to_genome(genome):
 	from subprocess import call
 	cmd = ["python","genbank_to_bed12.py", accession_number]
 	print 'calling: ' + " ".join(cmd)
@@ -139,17 +127,17 @@ def accession_to_genome(path_str):
 
 # 5. Automate conversion from bed file to bigbed file on cheaha
 # 	a. Create chrom.sizes file
-def mk_chrom_sizes_file(path_str):
+def mk_chrom_sizes_file(genome):
 	# 1. If known database, $ fetchChromSizes <db> > <db>.chrom.sizes
 	# 2. If new database, determine the number of nucleotides in the chromosomes
-	filename = "hh5Merlin2.chrom.sizes"
-	file_contents = path_str+"\t235646"
+	filename = abrev+".chrom.sizes"
+	file_contents = genome+"\t235646"
 	chrom_sizes_file = open(filename,'w')
-	chrom_sizes_file.write('NC_006273v2	235646')
+	chrom_sizes_file.write(file_contents)
 	chrom_sizes_file.close
 	'''
 	# Save file to subdir	
-	subdir = path_str
+	subdir = genome
 	dest_filepath = os.path.join(subdir, filename)
 	try:
 		shutil.move(filename,dest_filepath)
@@ -166,16 +154,16 @@ def mk_chrom_sizes_file(path_str):
 	print 'accession_to_genome function running for ' + accession_number
 	'''
 # 	b. Sort the bed file: $ sort -k1,1 -k2,2n unsorted.bed > sorted.bed
-def sort_bed_file(path_str):
-	old_filename = path_str+'.bed'
-	new_filename = path_str+'sorted.bed'
+def sort_bed_file(genome):
+	old_filename = genome+'.bed'
+	new_filename = genome+'sorted.bed'
 	from subprocess import call
 	cmd = ["sort","-k1,1","-k2,2n", old_filename,'-o', new_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 	#print 'sort_bed_file function running for ' + accession_number
 	# move sorted file to subdir
-	subdir = path_str
+	subdir = genome
 	filename = new_filename
 	dest_filepath = os.path.join(subdir, filename)
 	try:
@@ -188,16 +176,20 @@ def sort_bed_file(path_str):
 # 		1. $ module load ngs-ccts/ucsc_kent/2014-03-05
 # 		2. $ bedToBigBed in.bed hg19.chrom.sizes out.bb
 # 	d. Save bigbed file in directory
-def bedToBigBed(path_str):
+def bedToBigBed(genome):
 	from subprocess import call
-	sorted_bed_file = path_str+'sorted.bed'
-	output_filename = path_str+'.bb'
-	cmd = ["bedToBigBed",sorted_bed_file,"hh5Merlin2.chrom.sizes", output_filename]
+	sorted_bed_file = genome+'sorted.bed'
+	output_filename = genome+'.bb'
+	chrom_sizes_file = abrev+'.chrom.sizes'
+	# bedToBigBed -extraIndex=name -type=bed12 fileinsorted.bed chrom.sizes outputfile.bb
+	index = '-extraIndex=name'
+	bed_type = '-type=bed12'
+	cmd = ["bedToBigBed",index,bed_type, sorted_bed_file, chrom_sizes_file, output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 
 # 6. Create the hub.txt file and save in directory on server
-def mk_hub_txt_file(path_str):
+def mk_hub_txt_file(genome):
 	hub_name = 'hub.txt'
 	hub_short_label= 'Viruses-HH5(HCMV)'
 	hub_long_label= 'Track hub for HCMV strain from RefSeq and GenBank'
@@ -221,7 +213,7 @@ def mk_hub_txt_file(path_str):
 	hub_file_open.close()
 
 	# Save file to subdir
-	subdir = path_str
+	subdir = genome
 	dest_filepath = os.path.join(subdir, filename)
 	try:
 		shutil.move(filename,dest_filepath)
@@ -229,16 +221,16 @@ def mk_hub_txt_file(path_str):
 	except IOError:
 		print "Wrong path provided."
 
-def mk_descriptionUrl_file(path_str):
+def mk_descriptionUrl_file(genome):
 	filename = 'description.html'
-	description_str = """<html>\n<body>\n<h1>hello world</h1>\nThis is HCMV (HH5) strain Merlin and strain BE/7/2011, for starters.\n\nSupport contact: hh5trackhub@vo.uabgrid.uab.edu\n</body>\n</html>"""
+	description_str = """<html>\n<body>\n<h1>hello world</h1>\nThis is HCMV (HH5) strain Merlin, for starters.\n\nSupport contact: hh5trackhub@vo.uabgrid.uab.edu\n</body>\n</html>"""
 	#print description_str
 	description_file = open(filename,'w')
 	description_file.write(description_str)
 	description_file.close
 
 	# Save file to subdir
-	subdir = path_str
+	subdir = genome
 	dest_filepath = os.path.join(subdir, filename)
 	try:
 		shutil.move(filename,dest_filepath)
@@ -246,16 +238,30 @@ def mk_descriptionUrl_file(path_str):
 	except IOError:
 		print "Wrong path provided."
 
-def mk_genomes_file(path_str):
+def mk_genomes_file(genome):
 	filename = 'genomes.txt'
-	genomes_str = '''genome hh5Merlin2\ntrackDb hh5Merlin2/trackDb.txt\ntwoBitPath hh5Merlin2/NC_006273v2.2bit\ngroups hh5Merlin2/groups.txt\ndescription NC_006273v2\norganism HH5 strain Merlin\ndefaultPos NC_006273v2:1-235646\norderKey 100\nscientificName Human herpesvirus 5\nhtmlPath description.html'''
-	#print description_str
-	genomes_file = open(filename,'w')
-	genomes_file.write(genomes_str)
-	genomes_file.close
+	# genomes_str = 'genome '+abrev+'\ntrackDb '+abrev+'/trackDb.txt\ntwoBitPath '+abrev+'/NC_006273v2.2bit\ngroups '+abrev+'/groups.txt\ndescription '+genome+'\norganism HH5 strain Merlin\ndefaultPos NC_006273v2:1-235646\norderKey 100\nscientificName Human herpesvirus 5\nhtmlPath description.html'
+	# genomes_file = open(filename,'w')
+	# genomes_file.write(genomes_str)
+	# genomes_file.close
+	line1 = 'genome '+abrev
+	line2 = 'trackDb '+abrev+'/trackDb.txt'
+	line3 = 'twoBitPath '+abrev+'/NC_006273v2.2bit'
+	line4 = 'groups '+abrev+'/groups.txt'
+	line5 = 'description '+genome
+	line6 = 'organism HH5 strain Merlin'
+	line7 = 'defaultPos '+genome+':1-235646'
+	line8 = 'orderKey 100'
+	line9 = 'scientificName Human herpesvirus 5'
+	line10 = 'htmlPath description.html'
+	genomes_list_of_lines = [line1,line2,line3,line4,line5,line6,line7,line8,line9,line10]
+	genomes_file_open = open(filename,'w')
+	for line in genomes_list_of_lines:
+		genomes_file_open.writelines(line+'\n')
+	genomes_file_open.close()
 
 	# Save file to subdir
-	subdir = path_str
+	subdir = genome
 	dest_filepath = os.path.join(subdir, filename)
 	try:
 		shutil.move(filename,dest_filepath)
@@ -263,7 +269,7 @@ def mk_genomes_file(path_str):
 	except IOError:
 		print "Wrong path provided."
 
-def mk_groups_file(path_str):
+def mk_groups_file(genome):
 	filename = 'groups.txt'
 	groups_str = '''name gene\nlabel Genes and Gene Predictions\npriority 10\ndefaultIsClosed 1'''
 	#print description_str
@@ -272,7 +278,7 @@ def mk_groups_file(path_str):
 	groups_file.close
 
 	# Save file to subdir
-	subdir = path_str
+	subdir = genome
 	dest_filepath = os.path.join(subdir, filename)
 	try:
 		shutil.move(filename,dest_filepath)
@@ -303,15 +309,15 @@ def mk_groups_file(path_str):
 	Purpose: provide information about research to build credibility of data 
 	and help people decide whether or not to use data
 '''
-def mktrackDb_file(path_str):
+def mktrackDb_file(genome):
 	filename = "trackDb.txt"
-	trackDb_str = "track hh5Merlin2_refseq_mrna\nbigDataUrl NC_006273v2.mrna.bb\nshortLabel RefSeq Transcripts\nlongLabel RefSeq transcripts(mRNA)\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 12\ngroup genes\n\ntrack hh5Merlin2_refseq_loci\nbigDataUrl NC_006273v2_refseq_loci.bb\nshortLabel RefSeq loci\nlongLabel RefSeq loci\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 6\nsearchIndex name\ngroup genes"
+	trackDb_str = "track hh5Merlin2_refseq_mrna\nbigDataUrl NC_006273v2.mrna.bb\nshortLabel RefSeq Transcripts\nlongLabel RefSeq transcripts(mRNA)\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 12\ngroup genes\nsearchIndex name"
 	trackDb_file = open(filename,'w')
 	trackDb_file.write(trackDb_str)
 	trackDb_file.close
 
 	# Save file to subdir
-	subdir = path_str
+	subdir = genome
 	dest_filepath = os.path.join(subdir, filename)
 	try:
 		shutil.move(filename,dest_filepath)
@@ -322,13 +328,13 @@ def mktrackDb_file(path_str):
 def fasta_file(accession_number):
 	# if accession number has a period, indicating version number, replace with v.
 	if '.' in accession_number:
-		path_str='v'.join(accession_number.split('.'))
+		genome='v'.join(accession_number.split('.'))
 	else:
-		path_str = str(accession_number)
-	file_name = path_str + '.fna'
+		genome = str(accession_number)
+	file_name = genome + '.fna'
 	fasta_file = open(file_name, 'w')
 	from Bio import SeqIO
-	fasta_contents = SeqIO.convert(accession_number+".gbk", "genbank", path_str+".fna", "fasta")
+	fasta_contents = SeqIO.convert(accession_number+".gbk", "genbank", genome+".fna", "fasta")
 	# add code here to edit first line of fasta file_content by changing accession_number to path_file
 	# parsing code
 	fasta_file.close
@@ -337,7 +343,7 @@ def fasta_file(accession_number):
 	#print fasta_list[0]
 	words = fasta_list[0].split(' ')
 	if '.' in words[0]:
-		words[0]='>'+path_str
+		words[0]='>'+genome
 		fasta_list[0]=' '.join(words)
 		fasta_text= ''.join(fasta_list)
 	else:
@@ -346,38 +352,41 @@ def fasta_file(accession_number):
 	fasta_file = open(file_name, 'w')
 	fasta_file.write(fasta_text)
 	fasta_file.close
+	# fasta file must be in same directory to call faToTwoBit below
 
 # add function to create 2bit file from fasta
-def fasta_to_2bit(path_str):
+def fasta_to_2bit(genome):
 	from subprocess import call
-	fasta_file = path_str+'.fna'
-	output_2bit_filename = path_str+'.2bit'
+	fasta_file = genome+'.fna'
+	output_2bit_filename = genome+'.2bit'
 	cmd = ["faToTwoBit",fasta_file, output_2bit_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 
-# add functionality to search by gene name, add search index, and add index criteria to the 2bit conversion
 
 if __name__ == '__main__':
 	genbank_file(accession_number)
 	accession_to_genome(accession_number)
-	mkdir_p(path_str)
-	sort_bed_file(path_str)
-	mk_chrom_sizes_file(path_str)
-	bedToBigBed(path_str)
-	mk_hub_txt_file(path_str)
-	mk_descriptionUrl_file(path_str)
-	mk_genomes_file(path_str)
-	mk_groups_file(path_str)
-	mktrackDb_file(path_str)
+	mkdir_p(genome)
+	move_file(genome)
+	sort_bed_file(genome)
+	mk_chrom_sizes_file(genome)
+	bedToBigBed(genome)
+	mk_hub_txt_file(genome)
+	mk_descriptionUrl_file(genome)
+	mk_genomes_file(genome)
+	mk_groups_file(genome)
+	mktrackDb_file(genome)
 	fasta_file(accession_number)
-	fasta_to_2bit(path_str)
+	fasta_to_2bit(genome)
 
-# in project 0 folder on cheaha
-# load biopython 
-# 	$ module load ngs-ccts/miniconda/2-latest
+# in project 0 folder on cheaha2
+# 	$ cd project0
+# load and activate biopython 
+# 	$ module load Anaconda2/4.2.0
 # 	$ source activate py27_biopython
-# load bedToBigBed
-# 	$ module load ngs-ccts/ucsc_kent/2014-03-05
+# load Kent module
+# 	$ module load Kent_tools/340
+
 # run program with
-# $ python accession_to_genome.py NC_006273.2
+# $ python accession_to_genome.py NC_006273.2 hh5Merlin2
