@@ -334,10 +334,10 @@ def fasta_file(accession_number):
 	fasta_file.close
 	fasta_file=open(file_name,'r')
 	fasta_list =fasta_file.readlines()
-	print fasta_list[0]
+	#print fasta_list[0]
 	words = fasta_list[0].split(' ')
 	if '.' in words[0]:
-		words[0]='<'+path_str
+		words[0]='>'+path_str
 		fasta_list[0]=' '.join(words)
 		fasta_text= ''.join(fasta_list)
 	else:
@@ -347,7 +347,16 @@ def fasta_file(accession_number):
 	fasta_file.write(fasta_text)
 	fasta_file.close
 
+# add function to create 2bit file from fasta
+def fasta_to_2bit(path_str):
+	from subprocess import call
+	fasta_file = path_str+'.fna'
+	output_2bit_filename = path_str+'.2bit'
+	cmd = ["faToTwoBit",fasta_file, output_2bit_filename]
+	print 'calling: ' + " ".join(cmd)
+	call(cmd)
 
+# add functionality to search by gene name, add search index, and add index criteria to the 2bit conversion
 
 if __name__ == '__main__':
 	genbank_file(accession_number)
@@ -362,6 +371,7 @@ if __name__ == '__main__':
 	mk_groups_file(path_str)
 	mktrackDb_file(path_str)
 	fasta_file(accession_number)
+	fasta_to_2bit(path_str)
 
 # in project 0 folder on cheaha
 # load biopython 
