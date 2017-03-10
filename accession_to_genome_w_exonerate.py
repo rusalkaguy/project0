@@ -67,6 +67,7 @@ import shutil
 
 accession_number = argv[1] # Upacks argv-> assigned to 1 variable you can work with
 abrev = argv[2]
+
 track_hub_directory = 'hcmv_pub'
 
 # if accession number has a period, indicating version number, replace with v.
@@ -393,20 +394,19 @@ def move_files(accession_number, abrev):
 
 if __name__ == '__main__':
 	mkdir_p(track_hub_directory)
-	#change_dir(track_hub_directory)
-	#mkdir_p(abrev)
-	genbank_file(accession_number)
-	copy_file(accession_number+'.gbk',track_hub_directory,abrev)
-	accession_to_genome(accession_number)
-	copy_file(genome+".bed",track_hub_directory,abrev)
+
+	#genbank_file(accession_number)
+	#copy_file(accession_number+'.gbk',track_hub_directory,abrev)
+	#accession_to_genome(accession_number)
+	#copy_file(genome+".bed",track_hub_directory,abrev)
 	
 	sort_bed_file(genome,abrev)
 	copy_file(genome+"sorted.bed",track_hub_directory,abrev)
 	mk_chrom_sizes_file(genome,track_hub_directory,abrev)
 	bedToBigBed(genome)
 	copy_file(genome+'.bb',track_hub_directory,abrev)
-	mk_hub_txt_file(genome,track_hub_directory)
-	mk_descriptionUrl_file(genome,track_hub_directory)
+	#mk_hub_txt_file(genome,track_hub_directory)
+	#mk_descriptionUrl_file(genome,track_hub_directory)
 	mk_genomes_file(genome,track_hub_directory)
 	copy_file(accession_number+'.gbk',track_hub_directory,abrev)
 	change_dir(track_hub_directory)
@@ -417,8 +417,7 @@ if __name__ == '__main__':
 	mktrackDb_file(genome,abrev)
 	fasta_file(accession_number,abrev)
 	fasta_to_2bit(genome,abrev)
-	#move_files(genome)
-	# continue here
+
 
 # in project 0 folder on cheaha2
 # 	$ cd project0
@@ -429,4 +428,4 @@ if __name__ == '__main__':
 # 	$ module load Kent_tools/340
 
 # run program with
-# $ python accession_to_genome.py NC_006273.2 hh5Merlin2
+# $  python accession_to_genome_w_exonerate.py NC_006273.2 Merlin_exon_v1
