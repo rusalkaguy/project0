@@ -1,3 +1,4 @@
+from __future__ import division
 #!/usr/local/bin/python
 # coding: latin-1
 import os, sys
@@ -14,6 +15,7 @@ import os
 import shutil
 import pprint
 pp = pprint.PrettyPrinter(indent=0)
+
 
 
 bed_file_name = argv[1] # Upacks argv-> assigned to 1 variable you can work with
@@ -107,7 +109,7 @@ def normalize_bed_scores(genome):
 		#gene_name = col_list[3]
 		gene_name_and_genome = col_list[3].split('.')
 		gene_name = gene_name_and_genome[0]
-		genome_name = gene_name_and_genome[1]
+		genome_accession = gene_name_and_genome[1]
 		#print gene_name +','+ genome_accession
 		score = col_list[4]
 		strand = col_list[5]
@@ -116,33 +118,61 @@ def normalize_bed_scores(genome):
 		itemRgb = col_list[8]
 		blockCount = col_list[9]
 		blockSizes = col_list[10]
-		blockStarts = col_list[11]
+		blockStarts = col_list[11].replace("\n", "")
 
 		# Make Dictionary of Contigs per chromosome
-
+		# contigs = {chrom:{gene_name:score}}
 		if chrom not in contigs.keys(): 
 			# initialize genes dict because different gene_names per chrom
 			genes = {}
 			genes[gene_name] = score
 			contigs[chrom] = genes
-
 		if gene_name not in genes.keys():
 			contigs[chrom][gene_name] = score
 		else:
 			contigs[chrom][gene_name] = max(score,contigs[chrom][gene_name])
-		# else:
-		# 	contigs[chrom][gene_name] = max([score,contigs[chrom][gene_name]])
 		pp.pprint(contigs)
 
-
-		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_name])
-		output.append(new_line)
+		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
+		output.append(new_line+'\n')
 	#print output
 	sorted_bed_file.close()
+	# write output to bed file with 12+1 cols
 	normalized_bed_file = open(normalized_bed_filename,'w')
 	for line in output:
 		normalized_bed_file.write(line)
 	normalized_bed_file.close()
+	# Open newly written file to normalize scores
+	normalized_bed_file = open(normalized_bed_filename,'r')
+	normalized_line_list = normalized_bed_file.readlines()
+	output = []
+	for line in normalized_line_list:
+		col_list = line.split('\t')
+		chrom = col_list[0]
+		chromStart = col_list[1]
+		chromEnd = col_list[2]
+		gene_name = col_list[3]
+		score = col_list[4]
+		strand = col_list[5]
+		thickStart = col_list[6]
+		thickEnd = col_list[7]
+		itemRgb = col_list[8]
+		blockCount = col_list[9]
+		blockSizes = col_list[10]
+		blockStarts = col_list[11]
+		genome_accession = col_list[12]
+
+		normalized_score = str(int(round((int(score)/int(contigs[chrom][gene_name]))*1000)))
+		#print normalized_score
+
+		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,normalized_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
+		output.append(new_line)
+	print output
+	normalized_bed_file = open(normalized_bed_filename,'w')
+	for line in output:
+		normalized_bed_file.write(line)
+	normalized_bed_file.close()
+	# change code to index bed and bigBed file with additional column of accession to make searchable
 
 
 def copy_file(filename,track_hub_directory,abrev):
