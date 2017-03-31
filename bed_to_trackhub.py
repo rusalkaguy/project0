@@ -12,6 +12,9 @@ from os import path
 import errno
 import os
 import shutil
+import pprint
+pp = pprint.PrettyPrinter(indent=0)
+
 
 bed_file_name = argv[1] # Upacks argv-> assigned to 1 variable you can work with
 abrev = argv[2] # abrev is the the abreviated name of the chrom.sizes file and subdirectory, which should be SR10-01
@@ -83,6 +86,65 @@ def sort_bed_file(processed_bed_file_name, genome):
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 	
+def normalize_bed_scores(genome):
+	# Normalize score from 0-1000 per gene per chromosome
+	sorted_bed_filename = genome+'sorted.bed'
+	normalized_bed_filename = genome+'normalized.bed'
+	# Read in sorted bed file
+	sorted_bed_file = open(sorted_bed_filename,'r')
+	line_list = sorted_bed_file.readlines()
+	contigs = {}
+	genes = {}
+	output = []
+	for line in line_list:
+		col_list = line.split('\t')
+		#print col_list
+		#print 'length of col_list:', len(col_list)
+		#print line
+		chrom = col_list[0]
+		chromStart = col_list[1]
+		chromEnd = col_list[2]
+		#gene_name = col_list[3]
+		gene_name_and_genome = col_list[3].split('.')
+		gene_name = gene_name_and_genome[0]
+		genome_name = gene_name_and_genome[1]
+		#print gene_name +','+ genome_accession
+		score = col_list[4]
+		strand = col_list[5]
+		thickStart = col_list[6]
+		thickEnd = col_list[7]
+		itemRgb = col_list[8]
+		blockCount = col_list[9]
+		blockSizes = col_list[10]
+		blockStarts = col_list[11]
+
+		# Make Dictionary of Contigs per chromosome
+
+		if chrom not in contigs.keys(): 
+			# initialize genes dict because different gene_names per chrom
+			genes = {}
+			genes[gene_name] = score
+			contigs[chrom] = genes
+
+		if gene_name not in genes.keys():
+			contigs[chrom][gene_name] = score
+		else:
+			contigs[chrom][gene_name] = max(score,contigs[chrom][gene_name])
+		# else:
+		# 	contigs[chrom][gene_name] = max([score,contigs[chrom][gene_name]])
+		pp.pprint(contigs)
+
+
+		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_name])
+		output.append(new_line)
+	#print output
+	sorted_bed_file.close()
+	normalized_bed_file = open(normalized_bed_filename,'w')
+	for line in output:
+		normalized_bed_file.write(line)
+	normalized_bed_file.close()
+
+
 def copy_file(filename,track_hub_directory,abrev):
 	subdir2 = abrev
 	subdir1 = track_hub_directory
@@ -283,6 +345,7 @@ if __name__ == '__main__':
 	mk_groups_file(genome,abrev)
 	mktrackDb_file(genome,abrev)
 	# Do we want or need to copy fasta file to server since its it research, not public data yet?
+	normalize_bed_scores(genome)
 	print '\n'
 
 # in project 0 folder on cheaha2
