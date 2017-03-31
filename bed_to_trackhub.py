@@ -131,7 +131,7 @@ def normalize_bed_scores(genome):
 			contigs[chrom][gene_name] = score
 		else:
 			contigs[chrom][gene_name] = max(score,contigs[chrom][gene_name])
-		pp.pprint(contigs)
+		#pp.pprint(contigs)
 
 		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
 		output.append(new_line+'\n')
@@ -165,9 +165,9 @@ def normalize_bed_scores(genome):
 		normalized_score = str(int(round((int(score)/int(contigs[chrom][gene_name]))*1000)))
 		#print normalized_score
 
-		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,normalized_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
+		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,normalized_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts+'\n'])
 		output.append(new_line)
-	print output
+	#print output
 	normalized_bed_file = open(normalized_bed_filename,'w')
 	for line in output:
 		normalized_bed_file.write(line)
@@ -229,13 +229,14 @@ def mk_chrom_sizes_file(genome,track_hub_directory,abrev):
 
 def bedToBigBed(genome,abrev):
 	from subprocess import call
-	sorted_bed_file = genome+'sorted.bed'
+	normalized_bed_file = genome+'normalized.bed'
 	output_filename = genome+'.bb'
 	chrom_sizes_file = abrev+'.chrom.sizes'
+	#as_file = '-as='+abrev+'.fields.as'
 	# bedToBigBed -extraIndex=name -type=bed12 fileinsorted.bed chrom.sizes outputfile.bb
 	index = '-extraIndex=name'
 	bed_type = '-type=bed12'
-	cmd = ["bedToBigBed",index,bed_type, sorted_bed_file, chrom_sizes_file, output_filename]
+	cmd = ["bedToBigBed",index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 # change entries for this genome and track hub
@@ -249,7 +250,7 @@ def mk_hub_txt_file(genome,track_hub_directory):
 	
 	line1 = ' '.join(['hub',hub_name])
 	line2 = ' '.join(['shortLabel', hub_short_label])
-	line3 = ' '.join(['long_label', hub_long_label])
+	line3 = ' '.join(['longLabel', hub_long_label])
 	line4 = ' '.join(['genomesFile', genomes_filelist])
 	line5 = ' '.join(['email', email_address])
 	line6 = ' '.join(['descriptionUrl', descriptionUrl])
@@ -290,16 +291,12 @@ def mk_descriptionUrl_file(genome,track_hub_directory):
 
 def mk_genomes_file(genome,track_hub_directory):
 	filename = 'genomes.txt'
-	# genomes_str = 'genome '+abrev+'\ntrackDb '+abrev+'/trackDb.txt\ntwoBitPath '+abrev+'/NC_006273v2.2bit\ngroups '+abrev+'/groups.txt\ndescription '+genome+'\norganism HH5 strain Merlin\ndefaultPos NC_006273v2:1-235646\norderKey 100\nscientificName Human herpesvirus 5\nhtmlPath description.html'
-	# genomes_file = open(filename,'w')
-	# genomes_file.write(genomes_str)
-	# genomes_file.close
 	line1 = 'genome '+abrev
 	line2 = 'trackDb '+abrev+'/trackDb.txt'
 	line3 = 'twoBitPath '+abrev+'/'+genome+'.2bit'
 	line4 = 'groups '+abrev+'/groups.txt'
 	line5 = 'description '+genome
-	line6 = 'organism HH5 strain Merlin'
+	line6 = 'organism Virus'
 	line7 = 'defaultPos '+genome+':1-235646'
 	line8 = 'orderKey 100'
 	line9 = 'scientificName Human herpesvirus 5'
@@ -356,6 +353,8 @@ if __name__ == '__main__':
 	mkdir_p(track_hub_directory)
 	sort_bed_file(processed_bed_file_name,genome)
 	copy_file(genome+"sorted.bed",track_hub_directory,abrev)
+	normalize_bed_scores(genome)
+	copy_file(genome+"normalized.bed",track_hub_directory,abrev)
 	mk_chrom_sizes_file(genome,track_hub_directory,abrev)
 	bedToBigBed(genome,abrev)
 	copy_file(genome+'.bb',track_hub_directory,abrev)
@@ -375,7 +374,7 @@ if __name__ == '__main__':
 	mk_groups_file(genome,abrev)
 	mktrackDb_file(genome,abrev)
 	# Do we want or need to copy fasta file to server since its it research, not public data yet?
-	normalize_bed_scores(genome)
+	
 	print '\n'
 
 # in project 0 folder on cheaha2
