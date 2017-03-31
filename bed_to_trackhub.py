@@ -16,7 +16,7 @@ import shutil
 bed_file_name = argv[1] # Upacks argv-> assigned to 1 variable you can work with
 abrev = argv[2] # abrev is the the abreviated name of the chrom.sizes file and subdirectory, which should be SR10-01
 genome = abrev
-track_hub_directory = 'hcmv_pub'
+track_hub_directory = 'track_hub'
 
 # Read in bed file
 bed_file=open(bed_file_name,'r')
@@ -26,6 +26,7 @@ col_list = line_list[1].split('\t')
 # genome = accession_number
 #print line_list
 num_lines = len(line_list)
+print num_lines
 line = 1
 processed_bed_file_name= 'processed_'+bed_file_name
 processed_bed_file = open(processed_bed_file_name,'w')
@@ -57,10 +58,10 @@ while line<num_lines:
 	#raw_input()
 	line = line+1
 #print output
-bed_file.close
+bed_file.close()
 for line in output:
 	processed_bed_file.write(line)
-processed_bed_file.close
+processed_bed_file.close()
 
 
 
@@ -74,15 +75,14 @@ def mkdir_p(abrev):
 			raise
 	print "New directory, "+abrev+", created in the current directory."
 
-def sort_bed_file(bed_file_name, genome):
-	old_filename = bed_file_name
-	bed_file = open(bed_file_name)
+def sort_bed_file(processed_bed_file_name, genome):
+	old_filename = processed_bed_file_name
 	new_filename = genome+'sorted.bed'
 	from subprocess import call
-	cmd = ["sort","-k1,1","-k2,2n", old_filename,'-o', new_filename]
+	cmd = ['sort','-k1,1','-k2,2n', old_filename,'-o', new_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
-
+	
 def copy_file(filename,track_hub_directory,abrev):
 	subdir2 = abrev
 	subdir1 = track_hub_directory
@@ -96,18 +96,44 @@ def copy_file(filename,track_hub_directory,abrev):
 def mk_chrom_sizes_file(genome,track_hub_directory,abrev):
 	# 1. If known database, $ fetchChromSizes <db> > <db>.chrom.sizes
 	# 2. If new database, determine the number of nucleotides in the chromosomes
+	# 3. If multiple chromosomes or contigs, count the number of nucleotides in each
+
 	subdir = track_hub_directory
 	filename = abrev+".chrom.sizes"
-	dest_filepath = os.path.join(subdir, filename)
-	file_contents = genome+"\t235646"
+	fasta_filename = abrev+'.fa'
+	dest_filepath = os.path.join(subdir, fasta_filename)
+	# for 1 chromosome:
+	#file_contents = genome+"\t235646"
+	# for more than 1 chromosome/contig:
+	# count the number of nucleotides in each chrom/contig from fasta file
+	import sys
+	from Bio import SeqIO
+
+	FastaFile = open(fasta_filename, 'rU')
+	output = []
+	for rec in SeqIO.parse(FastaFile, 'fasta'):
+		name = rec.id
+		seq = rec.seq
+		seqLen = len(rec)
+		print name, seqLen
+		new_line = '\t'.join([name,str(seqLen)])
+		output.append(new_line+'\n')
+	print output
+	FastaFile.close()
+	# write output to file in subdir
 	chrom_sizes_file = open(dest_filepath,'w')
-	chrom_sizes_file.write(file_contents)
+	for line in output:
+		chrom_sizes_file.write(line)
+	chrom_sizes_file.close()
+	#chrom_sizes_file.write(output)
 	print 'wrote '+filename+' to '+dest_filepath
-	chrom_sizes_file.close
+	# write output to file in current directory
 	chrom_sizes_file = open(filename,'w')
-	chrom_sizes_file.write(file_contents)
-	chrom_sizes_file.close
+	for line in output:
+		chrom_sizes_file.write(line)
+	chrom_sizes_file.close()
 	print 'wrote '+filename+' to current directory'
+
 
 def bedToBigBed(genome,abrev):
 	from subprocess import call
@@ -120,6 +146,38 @@ def bedToBigBed(genome,abrev):
 	cmd = ["bedToBigBed",index,bed_type, sorted_bed_file, chrom_sizes_file, output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
+# change entries for this genome and track hub
+def mk_hub_txt_file(genome,track_hub_directory):
+	hub_name = 'hub.txt'
+	hub_short_label= 'Viruses-'
+	hub_long_label= 'Track hub for contigs of all genomes from Vicuna'
+	genomes_filelist= 'genomes.txt'
+	email_address = 'bheater.uab.edu'
+	descriptionUrl = 'description.html'
+	
+	line1 = ' '.join(['hub',hub_name])
+	line2 = ' '.join(['shortLabel', hub_short_label])
+	line3 = ' '.join(['long_label', hub_long_label])
+	line4 = ' '.join(['genomesFile', genomes_filelist])
+	line5 = ' '.join(['email', email_address])
+	line6 = ' '.join(['descriptionUrl', descriptionUrl])
+	hub_list_of_lines = [line1,line2,line3,line4,line5,line6]
+	filename = hub_name
+	hub_file_open = open(filename,'w')
+	hub_file_contents = '\n'.join([line1,line2,line3,line4,line5,line6])
+	#print hub_file_contents
+	for line in hub_list_of_lines:
+		hub_file_open.writelines(line+'\n')
+	hub_file_open.close()
+
+	# Save file to subdir
+	subdir = track_hub_directory
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided."
 
 def mk_genomes_file(genome,track_hub_directory):
 	filename = 'genomes.txt'
@@ -166,14 +224,14 @@ def mk_groups_file(genome,abrev):
 	groups_str = '''name gene\nlabel Genes and Gene Predictions\npriority 10\ndefaultIsClosed 1'''
 	groups_file = open(filename,'w')
 	groups_file.write(groups_str)
-	groups_file.close
+	groups_file.close()
 
 def mktrackDb_file(genome,abrev):
 	filename = "trackDb.txt"
 	trackDb_str = "track "+abrev+"_refseq_mrna\nbigDataUrl "+genome+".bb\nshortLabel RefSeq Transcripts\nlongLabel RefSeq transcripts(mRNA)\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 12\ngroup genes\nsearchIndex name"
 	trackDb_file = open(filename,'w')
 	trackDb_file.write(trackDb_str)
-	trackDb_file.close
+	trackDb_file.close()
 '''
 def fasta_file(accession_number, abrev):
 	# if accession number has a period, indicating version number, replace with v.
@@ -214,6 +272,7 @@ def fasta_to_2bit(fasta_file):
 if __name__ == '__main__':
 	mkdir_p(track_hub_directory)
 	sort_bed_file(processed_bed_file_name,genome)
+	raw_input()
 	copy_file(genome+"sorted.bed",track_hub_directory,abrev)
 	mk_chrom_sizes_file(genome,track_hub_directory,abrev)
 	bedToBigBed(genome,abrev)
@@ -236,7 +295,13 @@ if __name__ == '__main__':
 	mktrackDb_file(genome,abrev)
 	#fasta_file(accession_number,abrev)
 
-	
+# in project 0 folder on cheaha2
+# 	$ cd project0
+# load and activate biopython 
+# 	$ module load Anaconda2/4.2.0
+# 	$ source activate py27_biopython
+# load Kent module
+# 	$ module load Kent_tools/340
 
 # to run
 # python bed_to_trackhub.py all_geno.SR10-01.vicuna.contig.score100.best1.bed SR10-01
