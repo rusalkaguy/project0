@@ -26,7 +26,7 @@ col_list = line_list[1].split('\t')
 # genome = accession_number
 #print line_list
 num_lines = len(line_list)
-print num_lines
+#print num_lines
 line = 1
 processed_bed_file_name= 'processed_'+bed_file_name
 processed_bed_file = open(processed_bed_file_name,'w')
@@ -115,10 +115,10 @@ def mk_chrom_sizes_file(genome,track_hub_directory,abrev):
 		name = rec.id
 		seq = rec.seq
 		seqLen = len(rec)
-		print name, seqLen
+		#print name, seqLen
 		new_line = '\t'.join([name,str(seqLen)])
 		output.append(new_line+'\n')
-	print output
+	#print output
 	FastaFile.close()
 	# write output to file in subdir
 	chrom_sizes_file = open(dest_filepath,'w')
@@ -169,6 +169,23 @@ def mk_hub_txt_file(genome,track_hub_directory):
 	for line in hub_list_of_lines:
 		hub_file_open.writelines(line+'\n')
 	hub_file_open.close()
+
+	# Save file to subdir
+	subdir = track_hub_directory
+	dest_filepath = os.path.join(subdir, filename)
+	try:
+		shutil.move(filename,dest_filepath)
+		print filename+" moved to subdirectory "+ subdir
+	except IOError:
+		print "Wrong path provided."
+
+def mk_descriptionUrl_file(genome,track_hub_directory):
+	filename = 'description.html'
+	description_str = """<html>\n<body>\n<h1>hello world</h1>\nEnter information about this strain of virus here.\n\nSupport contact: bheater.uab.edu\n</body>\n</html>"""
+	#print description_str
+	description_file = open(filename,'w')
+	description_file.write(description_str)
+	description_file.close
 
 	# Save file to subdir
 	subdir = track_hub_directory
@@ -232,39 +249,13 @@ def mktrackDb_file(genome,abrev):
 	trackDb_file = open(filename,'w')
 	trackDb_file.write(trackDb_str)
 	trackDb_file.close()
-'''
-def fasta_file(accession_number, abrev):
-	# if accession number has a period, indicating version number, replace with v.
-	if '.' in accession_number:
-		genome='v'.join(accession_number.split('.'))
-	else:
-		genome = str(accession_number)
-	file_name = genome + '.fna'
-	fasta_file = open(file_name, 'w')
-	from Bio import SeqIO
-	fasta_contents = SeqIO.convert(accession_number+".gbk", "genbank", genome+".fna", "fasta")
-	# add code here to edit first line of fasta file_content by changing accession_number to path_file
-	# parsing code
-	fasta_file.close
-	fasta_file=open(file_name,'r')
-	fasta_list =fasta_file.readlines()
-	#print fasta_list[0]
-	words = fasta_list[0].split(' ')
-	if '.' in words[0]:
-		words[0]='>'+genome
-		fasta_list[0]=' '.join(words)
-		fasta_text= ''.join(fasta_list)
-	else:
-		fasta_text=fasta_list
-	fasta_file.close
-	fasta_file = open(file_name, 'w')
-	fasta_file.write(fasta_text)
-	fasta_file.close
-'''
-def fasta_to_2bit(fasta_file):
+
+def fasta_to_2bit(abrev,genome):
 	from subprocess import call
-	#fasta_file = genome+'.fna'
+	subdir = abrev
 	output_2bit_filename = genome+'.2bit'
+	#dest_filepath = os.path.join(subdir, output_2bit_filename)
+	fasta_file = genome+'.fa'
 	cmd = ["faToTwoBit",fasta_file, output_2bit_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
@@ -272,7 +263,6 @@ def fasta_to_2bit(fasta_file):
 if __name__ == '__main__':
 	mkdir_p(track_hub_directory)
 	sort_bed_file(processed_bed_file_name,genome)
-	raw_input()
 	copy_file(genome+"sorted.bed",track_hub_directory,abrev)
 	mk_chrom_sizes_file(genome,track_hub_directory,abrev)
 	bedToBigBed(genome,abrev)
@@ -290,10 +280,10 @@ if __name__ == '__main__':
 	change_dir(track_hub_directory)
 	mkdir_p(abrev)
 	change_dir(abrev)
-	# check locations of file created in functions below
 	mk_groups_file(genome,abrev)
 	mktrackDb_file(genome,abrev)
-	#fasta_file(accession_number,abrev)
+	# Do we want or need to copy fasta file to server since its it research, not public data yet?
+	print '\n'
 
 # in project 0 folder on cheaha2
 # 	$ cd project0
