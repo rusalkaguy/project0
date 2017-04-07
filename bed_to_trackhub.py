@@ -171,10 +171,11 @@ def normalize_bed_scores(genome):
 		blockStarts = col_list[11]
 		genome_accession = col_list[12]
 
-		normalized_score = str(int(round((int(score)/int(contigs[chrom][gene_name]))*1000)))
-		#print normalized_score
+		normalized_score = int(round((int(score)/int(contigs[chrom][gene_name]))*1000))
+		scaled_norm_score = str(int(round(max(20*(normalized_score-950),0))))
+		print scaled_norm_score
 
-		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,normalized_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts+'\n'])
+		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,scaled_norm_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts+'\n'])
 		output.append(new_line)
 	normalized_bed_file.close()
 	#print output
@@ -242,11 +243,12 @@ def bedToBigBed(genome,abrev):
 	normalized_bed_file = genome+'normalized.bed'
 	output_filename = genome+'.bb'
 	chrom_sizes_file = abrev+'.chrom.sizes'
-	#as_file = '-as='+abrev+'.fields.as'
+	as_file = '-as='+abrev+'.fields.as'
 	# bedToBigBed -extraIndex=name -type=bed12 fileinsorted.bed chrom.sizes outputfile.bb
 	index = '-extraIndex=name'
 	bed_type = '-type=bed12'
 	#bed_type = '-type=bed12+1'
+	#bed_type = '-type=bedDetail'
 	#index = '-extraIndex=name,genome_accession'
 	#cmd = ["bedToBigBed",as_file,index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
 	cmd = ["bedToBigBed",index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
@@ -359,6 +361,7 @@ def mktrackDb_file(genome,abrev):
 	trackType = "type bigBed 12"
 	group = "group genes"
 	searchIndex = "searchIndex name"
+	#searchIndex = "searchIndex name, genome_accession"
 	trackDb_str = '\n'.join([filename,track,visibility,bigDataUrl,shortLabel,longLabel,useScore,trackType,group,searchIndex])
 	trackDb_file = open(filename,'w')
 	trackDb_file.write(trackDb_str)
