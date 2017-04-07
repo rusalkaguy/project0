@@ -347,7 +347,19 @@ def mk_groups_file(genome,abrev):
 
 def mktrackDb_file(genome,abrev):
 	filename = "trackDb.txt"
-	trackDb_str = "track "+abrev+"_refseq_mrna\nbigDataUrl "+genome+".bb\nshortLabel RefSeq Transcripts\nlongLabel RefSeq transcripts(mRNA)\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 12\ngroup genes\nsearchIndex name"
+	#trackDb_str = "track "+abrev+"_refseq_mrna\nbigDataUrl "+genome+".bb\nshortLabel Virus Transcripts\nlongLabel RefSeq transcripts\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 12\ngroup genes\nsearchIndex name"
+	track = "track "+abrev+"_genes"
+	visibility = "visibility 3"
+	bigDataUrl = "bigDataUrl "+genome+".bb"
+	shortLabel = "shortLabel Virus Genes"
+	longLabel = "longLabel Virus Genes"
+	#colorByStrand= "colorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\n
+	#color = "color 0,60,120 " use different colors for genes, mrna, transcripts later on
+	useScore="useScore 1"
+	trackType = "type bigBed 12"
+	group = "group genes"
+	searchIndex = "searchIndex name"
+	trackDb_str = '\n'.join([filename,track,visibility,bigDataUrl,shortLabel,longLabel,useScore,trackType,group,searchIndex])
 	trackDb_file = open(filename,'w')
 	trackDb_file.write(trackDb_str)
 	trackDb_file.close()
