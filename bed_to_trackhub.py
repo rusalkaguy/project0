@@ -173,9 +173,9 @@ def normalize_bed_scores(genome):
 
 		normalized_score = int(round((int(score)/int(contigs[chrom][gene_name]))*1000))
 		scaled_norm_score = str(int(round(max(20*(normalized_score-950),0))))
-		print scaled_norm_score
+		#print scaled_norm_score
 
-		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,scaled_norm_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts+'\n'])
+		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,scaled_norm_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
 		output.append(new_line)
 	normalized_bed_file.close()
 	#print output
@@ -243,15 +243,14 @@ def bedToBigBed(genome,abrev):
 	normalized_bed_file = genome+'normalized.bed'
 	output_filename = genome+'.bb'
 	chrom_sizes_file = abrev+'.chrom.sizes'
-	as_file = '-as='+abrev+'.fields.as'
+	as_file = '-as=gene_prediction.fields.as'
 	# bedToBigBed -extraIndex=name -type=bed12 fileinsorted.bed chrom.sizes outputfile.bb
-	index = '-extraIndex=name'
-	bed_type = '-type=bed12'
-	#bed_type = '-type=bed12+1'
-	#bed_type = '-type=bedDetail'
-	#index = '-extraIndex=name,genome_accession'
-	#cmd = ["bedToBigBed",as_file,index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
-	cmd = ["bedToBigBed",index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
+	#index = '-extraIndex=name'
+	#bed_type = '-type=bed12'
+	bed_type = '-type=bed12+1'
+	index = '-extraIndex=name,genomeAccession'
+	cmd = ["bedToBigBed",as_file,index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
+	#cmd = ["bedToBigBed",index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 # change entries for this genome and track hub
@@ -314,9 +313,9 @@ def mk_genomes_file(genome,track_hub_directory):
 	line6 = 'organism Virus'
 	line7 = 'defaultPos '+genome+':1-235646'
 	line8 = 'orderKey 100'
-	line9 = 'scientificName Human herpesvirus 5'
+	#line9 = 'scientificName Human herpesvirus 5'
 	line10 = 'htmlPath description.html'
-	genomes_list_of_lines = [line1,line2,line3,line4,line5,line6,line7,line8,line9,line10]
+	genomes_list_of_lines = [line1,line2,line3,line4,line5,line6,line7,line8,line10]
 	genomes_file_open = open(filename,'w')
 	for line in genomes_list_of_lines:
 		genomes_file_open.writelines(line+'\n')
@@ -358,10 +357,10 @@ def mktrackDb_file(genome,abrev):
 	#colorByStrand= "colorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\n
 	#color = "color 0,60,120 " use different colors for genes, mrna, transcripts later on
 	useScore="useScore 1"
-	trackType = "type bigBed 12"
+	trackType = "type bigBed"
 	group = "group genes"
-	searchIndex = "searchIndex name"
-	#searchIndex = "searchIndex name, genome_accession"
+	#searchIndex = "searchIndex name"
+	searchIndex = "searchIndex name,genomeAccession"
 	trackDb_str = '\n'.join([filename,track,visibility,bigDataUrl,shortLabel,longLabel,useScore,trackType,group,searchIndex])
 	trackDb_file = open(filename,'w')
 	trackDb_file.write(trackDb_str)
@@ -411,7 +410,7 @@ if __name__ == '__main__':
 # 	$ module load Anaconda2/4.2.0
 # 	$ source activate py27_biopython
 # load Kent module
-# 	$ module load  2>&1 |grep -i Kent_tools/340
+# 	$ module load -i Kent_tools/340
 
 
 # to run
