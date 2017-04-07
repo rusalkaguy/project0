@@ -122,15 +122,24 @@ def normalize_bed_scores(genome):
 
 		# Make Dictionary of Contigs per chromosome
 		# contigs = {chrom:{gene_name:score}}
+		# genes = {gene_name:score}
 		if chrom not in contigs.keys(): 
 			# initialize genes dict because different gene_names per chrom
 			genes = {}
+			#genes = {gene_name:score}
 			genes[gene_name] = score
 			contigs[chrom] = genes
 		if gene_name not in genes.keys():
+			#genes[gene_name] = score
+			#contigs[chrom] = genes
 			contigs[chrom][gene_name] = score
 		else:
-			contigs[chrom][gene_name] = max(score,contigs[chrom][gene_name])
+			#genes = {gene_name,max(score,contigs[chrom][gene_name])}
+			#contigs[chrom] = genes
+			contigs[chrom][gene_name] = max(int(score),int(contigs[chrom][gene_name]))
+			#if score>contigs[chrom][gene_name]:
+				#contigs[chrom][gene_name] =score
+
 		#pp.pprint(contigs)
 
 		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
@@ -167,6 +176,7 @@ def normalize_bed_scores(genome):
 
 		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,normalized_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts+'\n'])
 		output.append(new_line)
+	normalized_bed_file.close()
 	#print output
 	normalized_bed_file = open(normalized_bed_filename,'w')
 	for line in output:
@@ -236,6 +246,9 @@ def bedToBigBed(genome,abrev):
 	# bedToBigBed -extraIndex=name -type=bed12 fileinsorted.bed chrom.sizes outputfile.bb
 	index = '-extraIndex=name'
 	bed_type = '-type=bed12'
+	#bed_type = '-type=bed12+1'
+	#index = '-extraIndex=name,genome_accession'
+	#cmd = ["bedToBigBed",as_file,index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
 	cmd = ["bedToBigBed",index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
@@ -383,7 +396,8 @@ if __name__ == '__main__':
 # 	$ module load Anaconda2/4.2.0
 # 	$ source activate py27_biopython
 # load Kent module
-# 	$ module load Kent_tools/340
+# 	$ module load  2>&1 |grep -i Kent_tools/340
+
 
 # to run
 # python bed_to_trackhub.py all_geno.SR10-01.vicuna.contig.score100.best1.bed SR10-01
