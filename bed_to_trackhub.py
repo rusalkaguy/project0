@@ -92,12 +92,13 @@ def normalize_bed_scores(genome):
 	# Normalize score from 0-1000 per gene per chromosome
 	sorted_bed_filename = genome+'sorted.bed'
 	normalized_bed_filename = genome+'normalized.bed'
+	best_normalized_bed_filename = genome+'best_normalized.bed'
 	# Read in sorted bed file
 	sorted_bed_file = open(sorted_bed_filename,'r')
 	line_list = sorted_bed_file.readlines()
 	contigs = {}
 	genes = {}
-	output = []
+	all_bed_output = []
 	linenum = 0
 	for line in line_list:
 		linenum = int(linenum+1) #one-based numbering of file lines
@@ -143,23 +144,24 @@ def normalize_bed_scores(genome):
 				contigs[chrom][gene_name]["max_score"] = int(score)
 				contigs[chrom][gene_name]["linenum"] = int(linenum)
 
-		#pp.pprint(contigs)
-
-		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
-		output.append(new_line+'\n')
-	#print output
+		orig_bed_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
+		all_bed_output.append(orig_bed_line+'\n')
+	#pp.pprint(contigs)
+	#print all_bed_output
 	sorted_bed_file.close()
-	# write output to bed file with 12+1 cols
-	normalized_bed_file = open(normalized_bed_filename,'w')
-	for line in output:
-		normalized_bed_file.write(line)
-	normalized_bed_file.close()
+	# write all_bed_output to bed file with 12+1 cols
+	processed_bed_file = open(normalized_bed_filename,'w')
+	for line in all_bed_output:
+		processed_bed_file.write(line)
+	processed_bed_file.close()
 	# Open newly written file to normalize scores
-	normalized_bed_file = open(normalized_bed_filename,'r')
-	normalized_line_list = normalized_bed_file.readlines()
-	output = []
+	processed_bed_file = open(normalized_bed_filename,'r')
+	processed_line_list = processed_bed_file.readlines()
+	all_bed_output = []
+	best_bed_output = []
 	linenum = 0
-	for line in normalized_line_list:
+	#print processed_line_list
+	for line in processed_line_list:
 		linenum = linenum+1 #one-based numbering of file lines
 		col_list = line.split('\t')
 		chrom = col_list[0]
@@ -175,20 +177,36 @@ def normalize_bed_scores(genome):
 		blockSizes = col_list[10]
 		blockStarts = col_list[11]
 		genome_accession = col_list[12]
-
+		# Normalize and scale the score
 		normalized_score = int(round((int(score)/int(contigs[chrom][gene_name]["max_score"]))*1000))
 		scaled_norm_score = str(int(round(max(20*(normalized_score-950),0))))
-		#print scaled_norm_score
-
+		# Reconstructed bed line with scaled, normalized score
+		normalized_bed_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,scaled_norm_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
+		all_bed_output.append(normalized_bed_line)
 		
-		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,scaled_norm_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
-		output.append(new_line)
-	normalized_bed_file.close()
+		# Write bed output with only the best matches (scores)
+
+		if chrom in contigs.keys() and gene_name in contigs[chrom].keys() and int(score) ==int(contigs[chrom][gene_name]["max_score"]):
+			#pp.pprint(contigs[chrom][gene_name]['linenum'])
+			#print 'score = '+str(score)+'\t'+ 'dict_score = '+str(contigs[chrom][gene_name]["max_score"])
+			best_match_normalized_bed_line =  '\t'.join([chrom,chromStart,chromEnd,gene_name,scaled_norm_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
+			#print best_match_normalized_bed_line
+			best_bed_output.append(best_match_normalized_bed_line)
+			
+	#pp.pprint(best_bed_output)
+	processed_bed_file.close()
 	#print output
-	normalized_bed_file = open(normalized_bed_filename,'w')
-	for line in output:
-		normalized_bed_file.write(line)
-	normalized_bed_file.close()
+	# Open file, write all scaled and normalized bed lines, and close file
+	all_normalized_bed_file = open(normalized_bed_filename,'w')
+	for line in all_bed_output:
+		all_normalized_bed_file.write(line)
+	all_normalized_bed_file.close()
+	# Open file, write only best scaled and normalized matches, and close file
+	best_normalized_bed_file = open(best_normalized_bed_filename, 'w')
+	for line in best_bed_output:
+		best_normalized_bed_file.write(line)
+	best_normalized_bed_file.close()
+
 
 	#for gene_name in file_contents:
 		# continue editing here
@@ -226,8 +244,8 @@ def mk_chrom_sizes_file(genome,track_hub_directory,abrev):
 		seq = rec.seq
 		seqLen = len(rec)
 		#print name, seqLen
-		new_line = '\t'.join([name,str(seqLen)])
-		output.append(new_line+'\n')
+		chrom_sizes_line = '\t'.join([name,str(seqLen)])
+		output.append(chrom_sizes_line+'\n')
 	#print output
 	FastaFile.close()
 	# write output to file in subdir
