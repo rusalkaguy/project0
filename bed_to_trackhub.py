@@ -425,14 +425,15 @@ if __name__ == '__main__':
 	sort_bed_file(processed_bed_file_name,genome)
 	copy_file(genome+"sorted.bed",track_hub_directory,abrev)
 	bed_filenames_list = create_normalized_bed_files(genome+'sorted.bed',genome)
-	copy_file(genome+"normalized.bed",track_hub_directory,abrev)
+	for bed_filename in bed_filenames_list:
+		copy_file(bed_filename,track_hub_directory,abrev)
 	mk_chrom_sizes_file(genome,track_hub_directory,abrev)
 	for input_bed_filename in bed_filenames_list:
 		ouput_bigbed_filename = bedToBigBed(input_bed_filename,abrev)
 		bigbed_filenames_list.append(ouput_bigbed_filename)
-
-	print bigbed_filenames_list
-	copy_file(genome+'.bb',track_hub_directory,abrev)
+	#print bigbed_filenames_list
+	for bigbed_filename in bigbed_filenames_list:
+		copy_file(bigbed_filename,track_hub_directory,abrev)
 
 	mk_hub_txt_file(genome,track_hub_directory)
 	mk_descriptionUrl_file(genome,track_hub_directory)
