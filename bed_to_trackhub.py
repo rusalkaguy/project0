@@ -88,11 +88,11 @@ def sort_bed_file(processed_bed_file_name, genome):
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 	
-def normalize_bed_scores(genome):
+def create_normalized_bed_files(sorted_bed_filename,genome):
 	# Normalize score from 0-1000 per gene per chromosome
 	sorted_bed_filename = genome+'sorted.bed'
-	normalized_bed_filename = genome+'normalized.bed'
-	best_normalized_bed_filename = genome+'best_normalized.bed'
+	normalized_bed_filename = genome+'.bed'
+	best_normalized_bed_filename = genome+'best.bed'
 	# Read in sorted bed file
 	sorted_bed_file = open(sorted_bed_filename,'r')
 	line_list = sorted_bed_file.readlines()
@@ -205,6 +205,8 @@ def normalize_bed_scores(genome):
 		best_normalized_bed_file.write(line)
 	best_normalized_bed_file.close()
 
+	bed_filenames_list= [normalized_bed_filename,best_normalized_bed_filename]
+	return bed_filenames_list
 
 def copy_file(filename,track_hub_directory,abrev):
 	subdir2 = abrev
@@ -258,10 +260,11 @@ def mk_chrom_sizes_file(genome,track_hub_directory,abrev):
 	print 'wrote '+filename+' to current directory'
 
 
-def bedToBigBed(genome,abrev):
+def bedToBigBed(input_bed_filename,abrev):
 	from subprocess import call
-	normalized_bed_file = genome+'normalized.bed'
-	output_filename = genome+'.bb'
+	#normalized_bed_file = genome+'normalized.bed'
+	#output_filename = genome+'.bb'
+	output_filename = input_bed_filename.split('.')[0]+'.bb'
 	chrom_sizes_file = abrev+'.chrom.sizes'
 	as_file = '-as=gene_prediction.fields.as'
 	# bedToBigBed -extraIndex=name -type=bed12 fileinsorted.bed chrom.sizes outputfile.bb
@@ -269,10 +272,11 @@ def bedToBigBed(genome,abrev):
 	#bed_type = '-type=bed12'
 	bed_type = '-type=bed12+1'
 	index = '-extraIndex=name,genomeAccession'
-	cmd = ["bedToBigBed",as_file,index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
+	cmd = ["bedToBigBed",as_file,index,bed_type, input_bed_filename, chrom_sizes_file, output_filename]
 	#cmd = ["bedToBigBed",index,bed_type, normalized_bed_file, chrom_sizes_file, output_filename]
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
+	return output_filename
 # change entries for this genome and track hub
 def mk_hub_txt_file(genome,track_hub_directory):
 	hub_name = 'hub.txt'
@@ -372,24 +376,37 @@ def mk_groups_file(genome,abrev):
 	groups_file.write(groups_str)
 	groups_file.close()
 
-def mktrackDb_file(genome,abrev):
-	filename = "trackDb.txt"
-	#trackDb_str = "track "+abrev+"_refseq_mrna\nbigDataUrl "+genome+".bb\nshortLabel Virus Transcripts\nlongLabel RefSeq transcripts\ncolorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\ntype bigBed 12\ngroup genes\nsearchIndex name"
-	track = "track "+abrev+"_genes"
+def mktrackDb_file(input_bigbed_filenames_list,abrev):
+	trackDb_list = []
+	track_filename = "trackDb.txt"
 	visibility = "visibility 3"
-	bigDataUrl = "bigDataUrl "+genome+".bb"
 	shortLabel = "shortLabel Virus Genes"
-	longLabel = "longLabel Virus Genes"
+	longLabel = "longLabel Virus Genes with Best Scores"
 	#colorByStrand= "colorByStrand 150,100,30 230,170,40\ncolor 150,100,30\naltColor 230,170,40\n
 	#color = "color 0,60,120 " use different colors for genes, mrna, transcripts later on
 	useScore="useScore 1"
 	trackType = "type bigBed"
 	group = "group genes"
-	#searchIndex = "searchIndex name"
 	searchIndex = "searchIndex name,genomeAccession"
-	trackDb_str = '\n'.join([filename,track,visibility,bigDataUrl,shortLabel,longLabel,useScore,trackType,group,searchIndex])
-	trackDb_file = open(filename,'w')
-	trackDb_file.write(trackDb_str)
+	for filename in input_bigbed_filenames_list:
+		#print filename.split('.')[0] ==abrev +'best'
+		#print abrev + 'best'
+		#print filename.split('.')[0]
+		if filename.split('.')[0] ==abrev +'best':
+			track = "track "+'best_'+abrev+"_genes"
+			longLabel = "longLabel Virus Genes with Best Scores"
+		else: 
+			track = "track "+'all_'+abrev+"_genes"
+			longLabel = "longLabel All Virus Genes"
+		bigDataUrl = "bigDataUrl "+filename
+		trackDb_str = '\n'.join([track,visibility,bigDataUrl,shortLabel,longLabel,useScore,trackType,group,searchIndex])
+		trackDb_list.append(trackDb_str+'\n')
+	
+	#pp.pprint(trackDb_list)
+	#print "filename: " + track_filename
+	trackDb_file = open(track_filename,'w')
+	for line in trackDb_list:
+		trackDb_file.write(line+'\n')
 	trackDb_file.close()
 
 def fasta_to_2bit(abrev,genome):
@@ -402,14 +419,19 @@ def fasta_to_2bit(abrev,genome):
 	print 'calling: ' + " ".join(cmd)
 	call(cmd)
 
+bigbed_filenames_list = []
 if __name__ == '__main__':
 	mkdir_p(track_hub_directory)
 	sort_bed_file(processed_bed_file_name,genome)
 	copy_file(genome+"sorted.bed",track_hub_directory,abrev)
-	normalize_bed_scores(genome)
+	bed_filenames_list = create_normalized_bed_files(genome+'sorted.bed',genome)
 	copy_file(genome+"normalized.bed",track_hub_directory,abrev)
 	mk_chrom_sizes_file(genome,track_hub_directory,abrev)
-	bedToBigBed(genome,abrev)
+	for input_bed_filename in bed_filenames_list:
+		ouput_bigbed_filename = bedToBigBed(input_bed_filename,abrev)
+		bigbed_filenames_list.append(ouput_bigbed_filename)
+
+	print bigbed_filenames_list
 	copy_file(genome+'.bb',track_hub_directory,abrev)
 
 	mk_hub_txt_file(genome,track_hub_directory)
@@ -425,9 +447,7 @@ if __name__ == '__main__':
 	mkdir_p(abrev)
 	change_dir(abrev)
 	mk_groups_file(genome,abrev)
-	mktrackDb_file(genome,abrev)
-	# Do we want or need to copy fasta file to server since its it research, not public data yet?
-	
+	mktrackDb_file(bigbed_filenames_list,abrev)
 	print '\n'
 
 # in project 0 folder on cheaha2
