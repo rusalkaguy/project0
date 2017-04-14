@@ -428,6 +428,13 @@ if __name__ == '__main__':
 	for bed_filename in bed_filenames_list:
 		copy_file(bed_filename,track_hub_directory,abrev)
 	mk_chrom_sizes_file(genome,track_hub_directory,abrev)
+	#copy chrom_sizes file to track_hub directory
+	try:
+		shutil.copy(genome+".chrom.sizes",os.path.join(track_hub_directory, genome+".chrom.sizes"))
+		print genome+".chrom.sizes moved to subdirectory "+ track_hub_directory
+	except IOError:
+		print "Wrong path provided because the bed file does not exist."
+
 	for input_bed_filename in bed_filenames_list:
 		ouput_bigbed_filename = bedToBigBed(input_bed_filename,abrev)
 		bigbed_filenames_list.append(ouput_bigbed_filename)
