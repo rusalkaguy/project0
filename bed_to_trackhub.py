@@ -22,7 +22,7 @@ bed_file_name = argv[1] # Upacks argv-> assigned to 1 variable you can work with
 abrev = argv[2] # abrev is the the abreviated name of the chrom.sizes file and subdirectory, which should be SR10-01
 genome = abrev
 track_hub_directory = 'track_hub'
-
+preferred_genome_accession = 'NC_'
 # Read in bed file
 bed_file=open(bed_file_name,'r')
 line_list =bed_file.readlines()
@@ -143,6 +143,8 @@ def normalize_bed_scores(genome):
 			if int(score)>int(contigs[chrom][gene_name]["max_score"]):
 				contigs[chrom][gene_name]["max_score"] = int(score)
 				contigs[chrom][gene_name]["linenum"] = int(linenum)
+			if int(score)==int(contigs[chrom][gene_name]["max_score"]) and preferred_genome_accession == genome_accession[0:2]:
+				contigs[chrom][gene_name]["linenum"] = int(linenum)
 
 		orig_bed_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
 		all_bed_output.append(orig_bed_line+'\n')
@@ -186,12 +188,8 @@ def normalize_bed_scores(genome):
 		
 		# Write bed output with only the best matches (scores)
 
-		if chrom in contigs.keys() and gene_name in contigs[chrom].keys() and int(score) ==int(contigs[chrom][gene_name]["max_score"]):
-			#pp.pprint(contigs[chrom][gene_name]['linenum'])
-			#print 'score = '+str(score)+'\t'+ 'dict_score = '+str(contigs[chrom][gene_name]["max_score"])
-			best_match_normalized_bed_line =  '\t'.join([chrom,chromStart,chromEnd,gene_name,scaled_norm_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
-			#print best_match_normalized_bed_line
-			best_bed_output.append(best_match_normalized_bed_line)
+		if int(linenum) ==int(contigs[chrom][gene_name]["linenum"]):
+			best_bed_output.append(normalized_bed_line)
 			
 	#pp.pprint(best_bed_output)
 	processed_bed_file.close()
@@ -207,9 +205,6 @@ def normalize_bed_scores(genome):
 		best_normalized_bed_file.write(line)
 	best_normalized_bed_file.close()
 
-
-	#for gene_name in file_contents:
-		# continue editing here
 
 def copy_file(filename,track_hub_directory,abrev):
 	subdir2 = abrev
