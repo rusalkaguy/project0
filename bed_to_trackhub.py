@@ -282,14 +282,14 @@ def mk_hub_txt_file(genome,track_hub_directory):
 	hub_name = 'hub.txt'
 	hub_short_label= 'Viruses-'
 	hub_long_label= 'Track hub for contigs of all genomes from Vicuna'
-	genomes_filelist= 'genomes.txt'
+	genomes_filename= genome+'.genomes.txt'
 	email_address = 'bheater.uab.edu'
 	descriptionUrl = 'description.html'
 	
 	line1 = ' '.join(['hub',hub_name])
 	line2 = ' '.join(['shortLabel', hub_short_label])
 	line3 = ' '.join(['longLabel', hub_long_label])
-	line4 = ' '.join(['genomesFile', genomes_filelist])
+	line4 = ' '.join(['genomesFile', genomes_filename])
 	line5 = ' '.join(['email', email_address])
 	line6 = ' '.join(['descriptionUrl', descriptionUrl])
 	hub_list_of_lines = [line1,line2,line3,line4,line5,line6]
@@ -334,7 +334,7 @@ def mk_genomes_file(genome,track_hub_directory):
 	first_line = chrom_sizes_file_open.readline()
 	#
 	chrom_sizes_file_open.close()
-	filename = 'genomes.txt'
+	filename = genome+'.genomes.txt'
 	line1 = 'genome '+abrev
 	line2 = 'trackDb '+abrev+'/trackDb.txt'
 	line3 = 'twoBitPath '+abrev+'/'+genome+'.2bit'
