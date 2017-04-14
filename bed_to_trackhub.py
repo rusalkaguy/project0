@@ -98,7 +98,9 @@ def normalize_bed_scores(genome):
 	contigs = {}
 	genes = {}
 	output = []
+	linenum = 0
 	for line in line_list:
+		linenum = int(linenum+1) #one-based numbering of file lines
 		col_list = line.split('\t')
 		#print col_list
 		#print 'length of col_list:', len(col_list)
@@ -127,18 +129,19 @@ def normalize_bed_scores(genome):
 			# initialize genes dict because different gene_names per chrom
 			genes = {}
 			#genes = {gene_name:score}
-			genes[gene_name] = score
+			genes[gene_name] = { "max_score": int(score), "linenum": int(linenum)}
 			contigs[chrom] = genes
 		if gene_name not in genes.keys():
 			#genes[gene_name] = score
 			#contigs[chrom] = genes
-			contigs[chrom][gene_name] = score
+			contigs[chrom][gene_name] = { "max_score": int(score), "linenum": int(linenum)}		
 		else:
 			#genes = {gene_name,max(score,contigs[chrom][gene_name])}
 			#contigs[chrom] = genes
-			contigs[chrom][gene_name] = max(int(score),int(contigs[chrom][gene_name]))
-			#if score>contigs[chrom][gene_name]:
-				#contigs[chrom][gene_name] =score
+			#contigs[chrom][gene_name] = max(int(score),int(contigs[chrom][gene_name]))
+			if int(score)>int(contigs[chrom][gene_name]["max_score"]):
+				contigs[chrom][gene_name]["max_score"] = int(score)
+				contigs[chrom][gene_name]["linenum"] = int(linenum)
 
 		#pp.pprint(contigs)
 
@@ -155,7 +158,9 @@ def normalize_bed_scores(genome):
 	normalized_bed_file = open(normalized_bed_filename,'r')
 	normalized_line_list = normalized_bed_file.readlines()
 	output = []
+	linenum = 0
 	for line in normalized_line_list:
+		linenum = linenum+1 #one-based numbering of file lines
 		col_list = line.split('\t')
 		chrom = col_list[0]
 		chromStart = col_list[1]
@@ -171,10 +176,11 @@ def normalize_bed_scores(genome):
 		blockStarts = col_list[11]
 		genome_accession = col_list[12]
 
-		normalized_score = int(round((int(score)/int(contigs[chrom][gene_name]))*1000))
+		normalized_score = int(round((int(score)/int(contigs[chrom][gene_name]["max_score"]))*1000))
 		scaled_norm_score = str(int(round(max(20*(normalized_score-950),0))))
 		#print scaled_norm_score
 
+		
 		new_line = '\t'.join([chrom,chromStart,chromEnd,gene_name,scaled_norm_score,strand,thickStart,thickEnd,itemRgb,blockCount,blockSizes,blockStarts,genome_accession])
 		output.append(new_line)
 	normalized_bed_file.close()
@@ -183,8 +189,9 @@ def normalize_bed_scores(genome):
 	for line in output:
 		normalized_bed_file.write(line)
 	normalized_bed_file.close()
-	# change code to index bed and bigBed file with additional column of accession to make searchable
 
+	#for gene_name in file_contents:
+		# continue editing here
 
 def copy_file(filename,track_hub_directory,abrev):
 	subdir2 = abrev
@@ -304,6 +311,12 @@ def mk_descriptionUrl_file(genome,track_hub_directory):
 		print "Wrong path provided."
 
 def mk_genomes_file(genome,track_hub_directory):
+	# read in length of chrom 1 from chrom.sizes file SR10-01.chrom.sizes
+	chrom_sizes_file = abrev+'.chrom.sizes'
+	chrom_sizes_file_open = open(chrom_sizes_file,'r')
+	first_line = chrom_sizes_file_open.readline()
+	#
+	chrom_sizes_file_open.close()
 	filename = 'genomes.txt'
 	line1 = 'genome '+abrev
 	line2 = 'trackDb '+abrev+'/trackDb.txt'
