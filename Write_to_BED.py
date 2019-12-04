@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Pull, parse, and write genbank data in bed6 format.
 
 # Import adds modules to your script from the python argv

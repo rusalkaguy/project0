@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Import adds modules to your script from the python argv
 # argv = argument variable that holds the arguments you pass to your script when you run it
 from sys import argv 
